@@ -1,0 +1,10 @@
+/docs/
+.venv/
+venv/
+env/
+/.vscode/
+/.idea/
+.env
+.env.*
+!.env.example
+!.env.template
