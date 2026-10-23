@@ -1,1 +1,1 @@
-"""Các thành phần của dự án nhận diện và giải Sudoku từ ảnh."""
+"""Components for recognizing and solving Sudoku puzzles from images."""
