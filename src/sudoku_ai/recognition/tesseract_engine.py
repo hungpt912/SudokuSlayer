@@ -1,2 +1,2 @@
-"""Nhận diện bằng Tesseract (cần cài chương trình Tesseract OCR trên máy)."""
+"""Recognize digits with Tesseract; requires a local Tesseract OCR installation."""
 

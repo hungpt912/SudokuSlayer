@@ -1,2 +1,2 @@
-"""Khuôn chung cho mọi engine nhận diện chữ số."""
+"""Common interface for digit recognition engines."""
 

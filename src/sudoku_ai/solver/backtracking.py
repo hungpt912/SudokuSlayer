@@ -1,2 +1,2 @@
-"""Giải Sudoku bằng quay lui (backtracking)."""
+"""Solve Sudoku puzzles using backtracking."""
 
