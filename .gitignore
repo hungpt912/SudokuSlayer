@@ -8,3 +8,5 @@ env/
 .env.*
 !.env.example
 !.env.template
+recognition/__pycache__/
+__pycache__/
