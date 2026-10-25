@@ -1,2 +1,2 @@
-"""Hiển thị bàn cờ Sudoku dạng bảng."""
+"""Display a Sudoku board as a grid."""
 

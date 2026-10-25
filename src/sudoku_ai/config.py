@@ -1,11 +1,17 @@
-"""Hằng số dùng chung toàn dự án."""
+"""Shared project constants."""
+
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = PROJECT_ROOT / "data"
+WICHT_DIR = DATA_DIR / "wicht"
 
 GRID_SIZE = 9
-WARP_SIZE = 450                      # cạnh ảnh lưới sau khi làm phẳng (px)
-CELL_SIZE = WARP_SIZE // GRID_SIZE   # cạnh mỗi ô (px)
-CELL_MARGIN = 0.12                   # tỉ lệ viền cắt bỏ trong mỗi ô để loại đường kẻ
-DIGIT_SIZE = 28                      # kích thước ảnh chữ số đưa vào engine nhận diện
-MAX_IMAGE_SIDE = 1200                # thu nhỏ ảnh đầu vào nếu cạnh dài hơn giá trị này
+WARP_SIZE = 450                      # Rectified board side length in pixels
+CELL_SIZE = WARP_SIZE // GRID_SIZE   # Cell side length in pixels
+CELL_MARGIN = 0.12                   # Fraction cropped from each cell edge to remove grid lines
+DIGIT_SIZE = 28                      # Digit image size expected by the recognition engine
+MAX_IMAGE_SIDE = 1200                # Downscale input images whose longest side exceeds this size
 
 DEFAULT_ENGINE = "tesseract"
-AVAILABLE_ENGINES = ("tesseract",)   # thêm "easyocr", "cnn" khi cài đặt xong
+AVAILABLE_ENGINES = ("tesseract",)   # Add "easyocr" or "cnn" once implemented

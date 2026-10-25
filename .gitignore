@@ -8,3 +8,7 @@ env/
 .env.*
 !.env.example
 !.env.template
+/data/mnist.npz
+/data/wicht/images/
+/outputs/
+__pycache__/

@@ -1,1 +1,1 @@
-"Giao diện người dùng cho Sudoku AI."
+"User interface for Sudoku AI."
