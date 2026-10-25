@@ -10,3 +10,5 @@ env/
 !.env.template
 /data/mnist.npz
 /data/wicht/images/
+/outputs/
+__pycache__/

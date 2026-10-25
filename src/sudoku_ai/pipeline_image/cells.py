@@ -67,8 +67,8 @@ def normalize_cell(cell_gray):
     return canvas
 
 
-# Divide the image into 9x9 cells
-def split_and_normalize(board_gray):
+# Split the board and crop cell borders before digit normalization
+def split_cells(board_gray):
     if board_gray.shape != (WARP_SIZE, WARP_SIZE):
         raise ValueError("Square image not be of the correct size (WARP_SIZE).")
 
@@ -84,10 +84,20 @@ def split_and_normalize(board_gray):
 
             inner_cell = cell[margin:CELL_SIZE - margin, margin:CELL_SIZE - margin]
 
-            normalized_cell = normalize_cell(inner_cell)
-            cell_images.append(normalized_cell)
+            cell_images.append(inner_cell.copy())
 
-    batch = np.array(cell_images, dtype=np.float32)
+    return cell_images
+
+
+# Normalize the 81 cropped cells for digit recognition
+def split_and_normalize(board_gray):
+    cell_images = split_cells(board_gray)
+    normalized_cells = []
+
+    for cell in cell_images:
+        normalized_cells.append(normalize_cell(cell))
+
+    batch = np.array(normalized_cells, dtype=np.float32)
     batch = batch / 255.0
     batch = np.expand_dims(batch, axis=-1)
 

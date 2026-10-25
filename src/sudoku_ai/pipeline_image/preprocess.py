@@ -45,4 +45,4 @@ def preprocess(image, connect_lines=False):
 
         detection_mask = cv2.morphologyEx(detection_mask, cv2.MORPH_CLOSE, kernel)
 
-    return {"original_gray": original_gray, "detection_mask": detection_mask, "scale_x": resized_width / original_width, "scale_y": resized_height / original_height}
+    return {"original_gray": original_gray, "resized_gray": small_gray, "blurred": blurred, "detection_mask": detection_mask, "scale_x": resized_width / original_width, "scale_y": resized_height / original_height}
