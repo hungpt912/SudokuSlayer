@@ -1,32 +1,49 @@
 # Sudoku Vision Solver
 
-Bài tập lớn môn Trí tuệ nhân tạo: nhận diện và giải Sudoku từ ảnh.
+Bài tập lớn môn Trí tuệ nhân tạo: Nhận diện và giải Sudoku từ ảnh.
 
-Luồng xử lý: đọc và tiền xử lý ảnh, tìm và nắn bảng, tách 81 ô, nhận diện chữ số, giải bằng backtracking.
+Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách 81 ô, nhận diện chữ số, giải bằng backtracking.
 
-## Cấu trúc
+## Cấu trúc dự án
 
 ```text
-├── app.py                          # Khung giao diện, thực hiện sau
-├── requirement.txt
-├── src/sudoku_ai/
-│   ├── __init__.py
-│   ├── config.py                   # Kích thước và hằng số dùng chung
-│   ├── dataset.py                  # Đọc ảnh và nhãn tham chiếu Wicht V2
-│   ├── pipeline_image/             # NGƯỜI A: ảnh Sudoku thành 81 ảnh ô
-│   │   ├── __init__.py
-│   │   ├── preprocess.py           # Đọc ảnh và tiền xử lý
-│   │   ├── grid.py                 # Tìm bảng và nắn phối cảnh
-│   │   └── cells.py                # Tách ô và chuẩn hóa
-│   ├── recognition/                # NGƯỜI B: ảnh ô thành bàn cờ 9×9
-│   ├── solver/                     # NGƯỜI C: kiểm tra và giải bàn cờ
-│   └── ui/                         # Khung hiển thị, thực hiện sau
-├── tests          
-└── data/
+├── app.py                          # Entrypoint ứng dụng chính / Giao diện
+├── requirement.txt                 # Các thư viện phụ thuộc[cite: 2]
+├── README.md                       # Tài liệu hướng dẫn dự án
+├── .gitignore                      # Cấu hình bỏ qua các file khi commit[cite: 1]
+│
+├── src/
+│   └── sudoku_ai/                  # Package chính của dự án
+│       ├── __init__.py
+│       ├── config.py               # Kích thước và hằng số dùng chung
+│       ├── dataset.py              # Đọc ảnh và nhãn tham chiếu Wicht V2
+│       │
+│       ├── recognition/            # Module nhận diện chữ số từ ảnh ô (OCR)
+│       │   ├── __init__.py
+│       │   ├── base.py             # Lớp nền tảng / Interface cho recognition
+│       │   └── tesseract_engine.py # Nhận diện bằng Tesseract OCR
+│       │
+│       ├── solver/                 # Module xử lý thuật toán giải Sudoku[cite: 1, 2]
+│       │   ├── __init__.py
+│       │   ├── backtracking.py     # Thuật toán giải Backtracking
+│       │   └── validator.py        # Kiểm tra tính hợp lệ của bàn cờ
+│       │
+│       └── ui/                     # Module giao diện người dùng
+│           └── board_view.py       # Hiển thị bàn cờ Sudoku
+│
+├── tests/                          # Các file test và script xem trước[cite: 1, 2]
+│   ├── solver/                     # Unit test cho module solver
+│   │   ├── backtracking.py
+│   │   └── validator.py
+│   ├── ui/                         # Test cho phần giao diện
+│   │   └── board_view.py
+│   ├── preview_pipeline_image.py   # Script xem trước kết quả pipeline xử lý ảnh
+│   └── test_pipeline_image.py      # Test cho pipeline xử lý ảnh
+│
+└── data/                           # Dữ liệu dự án (ảnh, nhãn, model data)
     ├── mnist.npz                   # Dữ liệu cục bộ cho nhận diện
     ├── wicht/                      # Metadata và hướng dẫn
-    └── wicht/images                # Chứa các file image.dat và image.jpg, dùng để làm dữ liệu ảnh chạy Sudoku, tự tải và thêm vào để sử dụng
-```
+    └── wicht/images                # Dữ liệu ảnh Sudoku (tự tải và thêm vào)
 
 Các module xử lý ảnh hiện là khung để bắt đầu hiện thực thuật toán.
 
