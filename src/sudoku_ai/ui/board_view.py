@@ -1,4 +1,4 @@
-"""Hiển thị bàn cờ Sudoku dạng bảng."""
+"""Display a Sudoku board as a grid."""
 
 import numpy as np
 import pandas as pd

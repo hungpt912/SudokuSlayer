@@ -12,7 +12,9 @@ import streamlit as st  # noqa: E402
 
 # from sudoku_ai.recognition import recognize_board  # noqa: E402
 from sudoku_ai.solver import solve  # noqa: E402
-# from sudoku_ai.pipeline_image import decode_image, extract_cells, find_grid, warp_grid  # noqa: E402
+from sudoku_ai.pipeline_image.cells import split_and_normalize  # noqa: E402
+from sudoku_ai.pipeline_image.grid import detect_and_warp  # noqa: E402
+from sudoku_ai.pipeline_image.preprocess import preprocess  # noqa: E402
 from sudoku_ai.ui.board_view import COLUMNS, highlight_new_cells  # noqa: E402
 
 # Chỉ cho nhập số nguyên 0..9 khi sửa kết quả nhận diện

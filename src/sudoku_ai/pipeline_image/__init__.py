@@ -1,1 +1,1 @@
-"""Xử lý ảnh Sudoku: tiền xử lý, nắn bảng, tách và chuẩn hóa 81 ô."""
+"""Preprocess Sudoku images, rectify boards, and split and normalize 81 cells."""
