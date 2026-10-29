@@ -10,7 +10,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
-# from sudoku_ai.recognition import recognize_board  # noqa: E402
+from sudoku_ai.recognition import get_engine  # noqa: E402
 from sudoku_ai.solver import solve  # noqa: E402
 from sudoku_ai.pipeline_image.cells import split_and_normalize  # noqa: E402
 from sudoku_ai.pipeline_image.grid import detect_and_warp  # noqa: E402
@@ -23,17 +23,36 @@ CELL_CONFIG = {
     for col in COLUMNS
 }
 
+@st.cache_resource(show_spinner="Đang tải mô hình CNN...")
+def load_engine():
+    """Nạp model một lần duy nhất, không nạp lại mỗi lần Streamlit chạy lại script."""
+    return get_engine("cnn")
 
-# @st.cache_data(show_spinner="Đang nhận diện...")
-# def read_sudoku(data: bytes):
-#     """Ảnh -> (ảnh lưới đã làm phẳng, bàn cờ 9x9). Trả về (None, None) nếu không thấy lưới."""
-#     image = decode_image(data)
-#     corners = find_grid(image)
-#     if corners is None:
-#         return None, None
-#     warped = warp_grid(image, corners)
-#     return warped, recognize_board(extract_cells(warped))
 
+def decode_image(data: bytes) -> np.ndarray:
+    """Bytes upload -> ảnh BGR (read_image trong preprocess.py chỉ nhận đường dẫn file)."""
+    image = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError("Không đọc được ảnh. Hãy thử file PNG/JPG khác.")
+    return image
+
+
+@st.cache_data(show_spinner="Đang nhận diện...")
+def read_sudoku(data: bytes):
+    """Ảnh -> (ảnh lưới đã làm phẳng, bàn cờ 9x9). Trả về (None, None) nếu không thấy lưới."""
+    image = decode_image(data)
+    warped = None
+    for connect_lines in (False, True):          # thử lần 2 nối các đường kẻ bị đứt
+        try:
+            warped = detect_and_warp(preprocess(image, connect_lines))["board_gray"]
+            break
+        except ValueError:
+            continue
+    if warped is None:
+        return None, None
+    cells = split_and_normalize(warped)          # (81, 28, 28, 1), float [0, 1]
+    board = np.array(load_engine().predict_board(cells), dtype=int)
+    return warped, board
 
 @st.cache_data(show_spinner="Đang giải...")
 def solve_cached(board: np.ndarray):
@@ -51,19 +70,19 @@ def main() -> None:
         st.info("Hãy tải lên một ảnh Sudoku để bắt đầu.")
         return
 
-    # try:
-    #     warped, board = read_sudoku(file.getvalue())
-    # except (ValueError, RuntimeError) as err:
-    #     st.error(str(err))
-    #     return
-    # if board is None:
-    #     st.error("Không tìm thấy lưới Sudoku. Hãy thử ảnh rõ nét, chụp thẳng hơn.")
-    #     return
+    try:
+        warped, board = read_sudoku(file.getvalue())
+    except (ValueError, RuntimeError) as err:
+        st.error(str(err))
+        return
+    if board is None:
+        st.error("Không tìm thấy lưới Sudoku. Hãy thử ảnh rõ nét, chụp thẳng hơn.")
+        return
 
     col1, col2, col3 = st.columns(3)
     with col1:
         st.subheader("1. Lưới tìm được")
-        # st.image(cv2.cvtColor(warped, cv2.COLOR_BGR2RGB))
+        st.image(warped)
     with col2:
         st.subheader("2. Nhận diện (sửa nếu sai)")
         st.caption("0 là ô trống. Bấm vào ô để sửa số.")

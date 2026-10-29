@@ -21,9 +21,13 @@ Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách
 │       ├── recognition/            # Module nhận diện chữ số từ ảnh ô (OCR)
 │       │   ├── __init__.py
 │       │   ├── base.py             # Lớp nền tảng / Interface cho recognition
-│       │   └── tesseract_engine.py # Nhận diện bằng Tesseract OCR
+│       │   ├── cnn_engine.py     # Engine dự đoán bằng mô hình CNN
+│       │   ├── cnn_model.py      # Định nghĩa kiến trúc mô hình CNN
+│       │   ├── mnist_cnn.keras   # Trọng số mô hình CNN đã huấn luyện
+│       │   ├── tesseract_engine.py # Engine nhận dạng bằng Tesseract OCR
+│       │   └── train.py          # Script huấn luyện mô hình CNN
 │       │
-│       ├── solver/                 # Module xử lý thuật toán giải Sudoku[cite: 1, 2]
+│       ├── solver/                 # Module xử lý thuật toán giải Sudoku
 │       │   ├── __init__.py
 │       │   ├── backtracking.py     # Thuật toán giải Backtracking
 │       │   └── validator.py        # Kiểm tra tính hợp lệ của bàn cờ
@@ -31,7 +35,7 @@ Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách
 │       └── ui/                     # Module giao diện người dùng
 │           └── board_view.py       # Hiển thị bàn cờ Sudoku
 │
-├── tests/                          # Các file test và script xem trước[cite: 1, 2]
+├── tests/                          # Các file test và script xem trước
 │   ├── solver/                     # Unit test cho module solver
 │   │   ├── backtracking.py
 │   │   └── validator.py
@@ -39,6 +43,11 @@ Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách
 │   │   └── board_view.py
 │   ├── preview_pipeline_image.py   # Script xem trước kết quả pipeline xử lý ảnh
 │   └── test_pipeline_image.py      # Test cho pipeline xử lý ảnh
+│   ├── test_app_flow.py          # Kiểm thử luồng hoạt động chính
+│   ├── test_cnn_accuracy.py      # Đánh giá độ chính xác của CNN
+│   ├── test_cnn_engine.py        # Kiểm thử CNN engine
+│   ├── test_cnn_model.py         # Kiểm thử kiến trúc mô hình CNN
+│   └── test_predict_board.py     # Kiểm thử nhận dạng toàn bộ bàn cờ
 │
 └── data/                           # Dữ liệu dự án (ảnh, nhãn, model data)
     ├── mnist.npz                   # Dữ liệu cục bộ cho nhận diện
