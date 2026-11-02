@@ -55,6 +55,7 @@ Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách
     └── wicht/images                # Dữ liệu ảnh Sudoku (tự tải và thêm vào)
 
 Các module xử lý ảnh hiện là khung để bắt đầu hiện thực thuật toán.
+```
 
 ## Phân công
 
