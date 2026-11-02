@@ -62,7 +62,27 @@ Các module xử lý ảnh hiện là khung để bắt đầu hiện thực thu
 - Người B phụ trách nhận diện nội dung 81 ô và tạo ma trận Sudoku.
 - Người C phụ trách kiểm tra bàn cờ và thuật toán giải Sudoku.
 
+## Dữ liệu
+
+Thư mục `data/` chứa:
+
+| Thành phần | Có sẵn trong repo? | Ghi chú |
+|---|---|---|
+| `data/wicht/*.desc`, `outlines_sorted.csv`, `SOURCE_README.rst` | Có | Danh sách train/test (160 + 40 ảnh) và tọa độ 4 góc bảng của bộ Wicht V2. |
+| `data/wicht/images/` | **Không** (đã `.gitignore`) | Tự tải rồi giải nén vào đây, gồm các cặp `imageN.jpg` và `imageN.dat` (nhãn). Nguồn: [wichtounet/sudoku_dataset](https://github.com/wichtounet/sudoku_dataset), dùng bản V2 (`v2_training`, `v2_test`). |
+| MNIST | Không cần đặt tay | `train.py` và `test_cnn_accuracy.py` gọi `tf.keras.datasets.mnist.load_data()`, Keras tự tải về `~/.keras/datasets/` lần đầu (cần mạng). |
+
+Bộ Wicht dùng để thử pipeline xử lý ảnh (xem `dataset.py`), còn MNIST dùng để huấn luyện CNN nhận diện chữ số.
+
 ## Test pipeline_image, cells_image được phóng to lên thành 228x228 để phục vụ kiểm tra
 python -m pytest tests/test_pipeline_image.py -v          # Pytest
 python tests/preview_pipeline_image.py --limit 10         # Test 10 images
 python tests/preview_pipeline_image.py --limit 0          # Test all images
+
+## Nguồn dữ liệu và giấy phép
+
+Bộ ảnh Sudoku của Baptiste Wicht và Jean Hennebert, phát hành theo giấy phép CC-BY-4.0. Nếu dùng trong báo cáo, trích dẫn:
+
+> Wicht, B., Hennebert, J. "Camera-based Sudoku recognition with deep belief network." *6th International Conference of Soft Computing and Pattern Recognition (SoCPaR)*, 2014, pp. 83–88.
+
+Tọa độ 4 góc bảng (`outlines_sorted.csv`) do Lars (@panexe) đóng góp. MNIST do Yann LeCun và cộng sự công bố.

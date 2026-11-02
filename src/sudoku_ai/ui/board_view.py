@@ -31,4 +31,4 @@ def highlight_new_cells(solved: np.ndarray, original: np.ndarray):
     """
     original = np.array(original, dtype=int)
     styles = pd.DataFrame(_style_matrix(original), columns=COLUMNS)
-    return to_frame(solved).style.apply(styles, axis=None)
+    return to_frame(solved).style.apply(lambda _: styles, axis=None)
