@@ -12,3 +12,4 @@ env/
 /data/wicht/images/
 /outputs/
 __pycache__/
+tmp/

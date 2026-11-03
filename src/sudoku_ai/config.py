@@ -13,5 +13,5 @@ CELL_MARGIN = 0.12                   # Fraction cropped from each cell edge to r
 DIGIT_SIZE = 28                      # Digit image size expected by the recognition engine
 MAX_IMAGE_SIDE = 1200                # Downscale input images whose longest side exceeds this size
 
-DEFAULT_ENGINE = "tesseract"
-AVAILABLE_ENGINES = ("tesseract",)   # Add "easyocr" or "cnn" once implemented
+DEFAULT_ENGINE = "cnn"
+AVAILABLE_ENGINES = ("cnn",)
