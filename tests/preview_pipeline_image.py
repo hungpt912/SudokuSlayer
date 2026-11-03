@@ -4,10 +4,14 @@ from shutil import copy2
 
 import cv2
 
-from sudoku_ai.config import GRID_SIZE
+from sudoku_ai.config import GRID_SIZE, WICHT_DIR
 from sudoku_ai.pipeline_image.cells import split_cells
 from sudoku_ai.pipeline_image.grid import detect_and_warp
 from sudoku_ai.pipeline_image.preprocess import preprocess, read_image
+
+IMAGE_DIRECTORY = WICHT_DIR / "images"
+IMAGE_LIMIT = 100
+OUTPUT_DIRECTORY = Path("outputs")
 
 
 def save_image(image_path, image):
@@ -65,9 +69,9 @@ def preview_image(image_path, output_directory):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--images", type=Path, default=Path(r"C:\Users\Admin\Downloads\sudoku_dataset-master\sudoku_dataset-master\images"))
-    parser.add_argument("--limit", type=int, default=10)
-    parser.add_argument("--output", type=Path, default=Path("outputs"))
+    parser.add_argument("--images", type=Path, default=IMAGE_DIRECTORY)
+    parser.add_argument("--limit", type=int, default=IMAGE_LIMIT)
+    parser.add_argument("--output", type=Path, default=OUTPUT_DIRECTORY)
     args = parser.parse_args()
 
     if args.limit < 0:
