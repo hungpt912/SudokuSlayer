@@ -12,4 +12,8 @@ env/
 /data/wicht/images/
 /outputs/
 __pycache__/
+recognition/__pycache__/
+__pycache__/
+recognition/__pycache__/
+__pycache__/
 tmp/
