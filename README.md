@@ -75,14 +75,9 @@ Thư mục `data/` chứa:
 
 Bộ Wicht dùng để thử pipeline xử lý ảnh (xem `dataset.py`), còn MNIST dùng để huấn luyện CNN nhận diện chữ số.
 
-## Test pipeline_image, cells_image được phóng to lên thành 228x228 để phục vụ kiểm tra
-python -m pytest tests/test_pipeline_image.py -v          # Pytest
-python tests/preview_pipeline_image.py --limit 10         # Test 10 images
-python tests/preview_pipeline_image.py --limit 0          # Test all images
-
 ## Nguồn dữ liệu và giấy phép
 
-Bộ ảnh Sudoku của Baptiste Wicht và Jean Hennebert, phát hành theo giấy phép CC-BY-4.0. Nếu dùng trong báo cáo, trích dẫn:
+Bộ ảnh Sudoku của Baptiste Wicht và Jean Hennebert, phát hành theo giấy phép CC-BY-4.0. 
 
 > Wicht, B., Hennebert, J. "Camera-based Sudoku recognition with deep belief network." *6th International Conference of Soft Computing and Pattern Recognition (SoCPaR)*, 2014, pp. 83–88.
 
