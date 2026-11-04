@@ -173,6 +173,15 @@ def test_digit_is_kept_beside_grid_remnant():
     assert overlap / combined > 0.90
 
 
+def test_thinning_preserves_single_pixel_stroke():
+    cell = np.full((30, 24), 230, dtype=np.uint8)
+    cv2.line(cell, (12, 5), (12, 24), 10, 1)
+
+    normalized = normalize_cell(cell, resize_scale=1.0)
+
+    assert np.count_nonzero(normalized) > 0
+
+
 def test_split_cells_follows_shifted_grid_lines():
     board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
     scale = WARP_SIZE / 450
