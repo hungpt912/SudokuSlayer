@@ -3,21 +3,23 @@ import numpy as np
 import pytest
 
 from sudoku_ai.config import CELL_MARGIN, CELL_SIZE, DIGIT_SIZE, GRID_SIZE, MAX_IMAGE_SIDE, WARP_SIZE
-from sudoku_ai.pipeline_image.cells import split_and_normalize, split_cells
+from sudoku_ai.pipeline_image.cells import find_cell_boundaries, normalize_cell, split_and_normalize, split_cells
 from sudoku_ai.pipeline_image.grid import detect_and_warp
 from sudoku_ai.pipeline_image.preprocess import preprocess
 
 
 def create_test_image():
-    board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
-    cell_size = WARP_SIZE // GRID_SIZE
+    board_size = 450
+    last_pixel = board_size - 1
+    board = np.full((board_size, board_size), 255, dtype=np.uint8)
+    cell_size = board_size // GRID_SIZE
     digit_positions = {(0, 0): "5", (4, 4): "3", (8, 8): "7"}
 
     for index in range(GRID_SIZE + 1):
-        position = min(index * cell_size, WARP_SIZE - 1)
+        position = min(index * cell_size, last_pixel)
         thickness = 3 if index % 3 == 0 else 1
-        cv2.line(board, (position, 0), (position, WARP_SIZE - 1), 0, thickness)
-        cv2.line(board, (0, position), (WARP_SIZE - 1, position), 0, thickness)
+        cv2.line(board, (position, 0), (position, last_pixel), 0, thickness)
+        cv2.line(board, (0, position), (last_pixel, position), 0, thickness)
 
     for position, digit in digit_positions.items():
         row, column = position
@@ -27,7 +29,7 @@ def create_test_image():
         y = row * cell_size + (cell_size + text_height) // 2
         cv2.putText(board, digit, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, 0, 2)
 
-    source_corners = np.array([[0, 0], [WARP_SIZE - 1, 0], [WARP_SIZE - 1, WARP_SIZE - 1], [0, WARP_SIZE - 1]], dtype=np.float32)
+    source_corners = np.array([[0, 0], [last_pixel, 0], [last_pixel, last_pixel], [0, last_pixel]], dtype=np.float32)
     expected_corners = np.array([[100, 70], [560, 100], [590, 540], [70, 510]], dtype=np.float32)
     transform = cv2.getPerspectiveTransform(source_corners, expected_corners)
     image_gray = cv2.warpPerspective(board, transform, (700, 600), borderValue=255)
@@ -116,3 +118,92 @@ def test_image_without_grid():
 
     with pytest.raises(ValueError):
         detect_and_warp(preprocessed)
+
+
+def test_empty_cell_with_shadow_and_grid_remnants():
+    random = np.random.default_rng(42)
+    background = np.tile(np.linspace(110, 170, 38), (38, 1))
+    cell = np.clip(background + random.normal(0, 1, background.shape), 0, 255).astype(np.uint8)
+    cv2.line(cell, (0, 0), (37, 0), 50, 2)
+    cv2.line(cell, (0, 0), (0, 37), 50, 2)
+    cell = cv2.GaussianBlur(cell, (5, 5), 1)
+    before = cell.copy()
+
+    normalized = normalize_cell(cell)
+
+    assert np.count_nonzero(normalized) == 0
+    np.testing.assert_array_equal(cell, before)
+
+
+@pytest.mark.parametrize("digit", ["1", "6", "8"])
+def test_blurred_digit_preserves_shape(digit):
+    cell = np.full((38, 38), 180, dtype=np.uint8)
+    cv2.putText(cell, digit, (9, 29), cv2.FONT_HERSHEY_SIMPLEX, 0.9, 40, 2, cv2.LINE_AA)
+    cell = cv2.GaussianBlur(cell, (7, 7), 1.3)
+
+    normalized = normalize_cell(cell)
+
+    assert normalized.shape == (DIGIT_SIZE, DIGIT_SIZE)
+    assert normalized.dtype == np.uint8
+    assert np.count_nonzero(normalized) > 0
+    moments = cv2.moments(normalized)
+    assert moments["m10"] / moments["m00"] == pytest.approx(13.5, abs=0.6)
+    assert moments["m01"] / moments["m00"] == pytest.approx(13.5, abs=0.6)
+
+    # Closed loops in 6 and 8 must not become solid blobs after normalization
+    if digit in ("6", "8"):
+        mask = (normalized > 127).astype(np.uint8)
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        hole_count = np.count_nonzero(hierarchy[0, :, 3] >= 0)
+        assert hole_count == (1 if digit == "6" else 2)
+
+
+def test_digit_is_kept_beside_grid_remnant():
+    cell = np.full((38, 38), 200, dtype=np.uint8)
+    cv2.putText(cell, "1", (9, 29), cv2.FONT_HERSHEY_SIMPLEX, 0.9, 30, 2, cv2.LINE_AA)
+    expected = normalize_cell(cell)
+    cv2.line(cell, (0, 0), (37, 0), 0, 2)
+    cv2.line(cell, (0, 0), (0, 37), 0, 2)
+
+    # Local thresholding can change edge intensities, but must preserve the digit
+    actual_mask = normalize_cell(cell) > 127
+    expected_mask = expected > 127
+    overlap = np.count_nonzero(actual_mask & expected_mask)
+    combined = np.count_nonzero(actual_mask | expected_mask)
+    assert overlap / combined > 0.90
+
+
+def test_split_cells_follows_shifted_grid_lines():
+    board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
+    scale = WARP_SIZE / 450
+    rows = [round(position * scale) for position in [0, 58, 94, 158, 194, 255, 295, 358, 394, 450]]
+    columns = [round(position * scale) for position in [0, 44, 108, 145, 208, 244, 306, 344, 408, 450]]
+
+    for position in rows[1:-1]:
+        cv2.line(board, (0, position), (WARP_SIZE - 1, position), 0, 3)
+    for position in columns[1:-1]:
+        cv2.line(board, (position, 0), (position, WARP_SIZE - 1), 0, 3)
+
+    before = board.copy()
+    detected_rows, detected_columns = find_cell_boundaries(board)
+    np.testing.assert_allclose(detected_rows, rows, atol=1)
+    np.testing.assert_allclose(detected_columns, columns, atol=1)
+    cells = split_cells(board)
+    assert len(cells) == GRID_SIZE * GRID_SIZE
+    assert all(np.all(cell == 255) for cell in cells)
+    np.testing.assert_array_equal(board, before)
+
+
+def test_missing_grid_lines_use_equal_cells():
+    board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
+    expected = list(range(0, WARP_SIZE + 1, CELL_SIZE))
+
+    assert find_cell_boundaries(board) == [expected, expected]
+
+
+@pytest.mark.parametrize("shape", [(1, 1), (2, 2), (3, 3)])
+def test_tiny_empty_cell(shape):
+    normalized = normalize_cell(np.full(shape, 255, dtype=np.uint8))
+
+    assert normalized.shape == (DIGIT_SIZE, DIGIT_SIZE)
+    assert np.count_nonzero(normalized) == 0
