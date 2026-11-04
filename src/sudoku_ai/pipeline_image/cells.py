@@ -66,6 +66,13 @@ def normalize_cell(cell_gray, resize_scale=2.0):
     digit_mask = np.zeros(binary.shape, dtype=np.uint8)
     digit_mask[labels == best_label] = 255
 
+    # Thin the stroke while preserving digits that would disappear or split
+    kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+    thinner_mask = cv2.erode(digit_mask, kernel)
+    component_count, _ = cv2.connectedComponents(thinner_mask, connectivity=8)
+    if component_count == 2:
+        digit_mask = thinner_mask
+
     digit = digit_mask[y:y + height, x:x + width]
 
     resize_ratio = min(DIGIT_CONTENT_SIZE / width, DIGIT_CONTENT_SIZE / height)
