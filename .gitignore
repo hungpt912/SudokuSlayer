@@ -8,8 +8,12 @@ env/
 .env.*
 !.env.example
 !.env.template
-/data/mnist.npz
+/backup/
 /data/wicht/images/
+/data/Lexski/*
+!/data/Lexski/manifest.json
+/data/Murphy/*
+!/data/Murphy/manifest.json
 /outputs/
 __pycache__/
 recognition/__pycache__/

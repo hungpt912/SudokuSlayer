@@ -1,0 +1,692 @@
+[
+  {
+    "file": "07jx5gsct51d1.webp",
+    "board": "065040830400000001000205000003060400800000006002010900000407000100000009084090570",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/07jx5gsct51d1.webp",
+    "corners": [
+      [
+        1.3999999762,
+        1.8999999762
+      ],
+      [
+        1.5,
+        749.799987793
+      ],
+      [
+        749.0,
+        749.799987793
+      ],
+      [
+        748.9000244141,
+        1.8999999762
+      ]
+    ]
+  },
+  {
+    "file": "0t1g4k7u4lec1.jpeg",
+    "board": "300060000800000700004501000100093067090000030730180002001006200008000005000010004",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/0t1g4k7u4lec1.jpeg",
+    "corners": [
+      [
+        12.1800003052,
+        142.25
+      ],
+      [
+        12.1800003052,
+        799.3400268555
+      ],
+      [
+        615.1400146484,
+        800.2199707031
+      ],
+      [
+        614.700012207,
+        141.8099975586
+      ]
+    ]
+  },
+  {
+    "file": "1tovw2sbv6fc1.jpeg",
+    "board": "000003810300507040000086000090000006760000058100050030000920000050401007019700000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/1tovw2sbv6fc1.jpeg",
+    "corners": [
+      [
+        8.8400001526,
+        140.2899932861
+      ],
+      [
+        9.470000267,
+        798.4199829102
+      ],
+      [
+        611.9199829102,
+        798.0599975586
+      ],
+      [
+        611.25,
+        140.75
+      ]
+    ]
+  },
+  {
+    "file": "35lik5h9ar0d1.webp",
+    "board": "007000400500000026000180000800502000270036010030900008020700160000009000060050000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/35lik5h9ar0d1.webp",
+    "corners": [
+      [
+        14.8999996185,
+        92.9000015259
+      ],
+      [
+        7.6999998093,
+        1132.9000244141
+      ],
+      [
+        1049.3100585938,
+        1146.0799560547
+      ],
+      [
+        1070.5,
+        89.5999984741
+      ]
+    ]
+  },
+  {
+    "file": "3bor2sty6q0d1.webp",
+    "board": "175694328400005916960130457204061579617059802590200601321586794859000163746913285",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/3bor2sty6q0d1.webp",
+    "corners": [
+      [
+        6.3000001907,
+        6.5
+      ],
+      [
+        0.0,
+        1000.0
+      ],
+      [
+        1080.0,
+        990.5
+      ],
+      [
+        1075.5,
+        0.0
+      ]
+    ]
+  },
+  {
+    "file": "4agnt3e32k0d1.webp",
+    "board": "000046000006000089020708010080400062409300875000605041007093600200007030010000000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/4agnt3e32k0d1.webp",
+    "corners": [
+      [
+        4.9000000954,
+        250.1000061035
+      ],
+      [
+        5.0,
+        939.9000244141
+      ],
+      [
+        694.799987793,
+        940.0999755859
+      ],
+      [
+        695.0999755859,
+        250.1000061035
+      ]
+    ]
+  },
+  {
+    "file": "4qss4e28fs0d1.webp",
+    "board": "002809010001060050000000608507000200000006047020090000304900000100030800080000070",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/4qss4e28fs0d1.webp",
+    "corners": [
+      [
+        8.8999996185,
+        9.6999998093
+      ],
+      [
+        9.0,
+        1071.9000244141
+      ],
+      [
+        1070.5999755859,
+        1071.9000244141
+      ],
+      [
+        1070.5999755859,
+        9.8000001907
+      ]
+    ]
+  },
+  {
+    "file": "64580592jqzc1.webp",
+    "board": "090500030000006021403000000001073500000000000030009200000007900560042380080000000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/64580592jqzc1.webp",
+    "corners": [
+      [
+        9.3999996185,
+        7.8000001907
+      ],
+      [
+        9.3999996185,
+        1070.1999511719
+      ],
+      [
+        1071.4000244141,
+        1070.5
+      ],
+      [
+        1071.4000244141,
+        7.8000001907
+      ]
+    ]
+  },
+  {
+    "file": "6qwjg7omxh0d1.webp",
+    "board": "006000050001950800005780004413078020672039100958002703569001000007365490004097506",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/6qwjg7omxh0d1.webp",
+    "corners": [
+      [
+        56.0,
+        177.0
+      ],
+      [
+        73.6999969482,
+        1257.0999755859
+      ],
+      [
+        1069.9000244141,
+        1251.3000488281
+      ],
+      [
+        1070.3000488281,
+        193.3999938965
+      ]
+    ]
+  },
+  {
+    "file": "9p3wy0w89x0d1.webp",
+    "board": "740900600002600030000200500000000000015004003470008009500000000000000048069030010",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/9p3wy0w89x0d1.webp",
+    "corners": [
+      [
+        0.0,
+        3.4000000954
+      ],
+      [
+        0.0,
+        1080.9000244141
+      ],
+      [
+        1075.5999755859,
+        1080.9000244141
+      ],
+      [
+        1075.0,
+        2.7999999523
+      ]
+    ]
+  },
+  {
+    "file": "abgql6m5k51d1.webp",
+    "board": "800050004030412060007000200000900000640030059000001000005000300080175090900060008",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/abgql6m5k51d1.webp",
+    "corners": [
+      [
+        1.2999999523,
+        2.0999999046
+      ],
+      [
+        1.6000000238,
+        749.9000244141
+      ],
+      [
+        749.0999755859,
+        750.0
+      ],
+      [
+        749.200012207,
+        2.0
+      ]
+    ]
+  },
+  {
+    "file": "c4rx3kyz6m9c1.webp",
+    "board": "000059010000000000000008907076000001080040030000560000900070040034000080800100560",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/c4rx3kyz6m9c1.webp",
+    "corners": [
+      [
+        7.4099998474,
+        70.6800003052
+      ],
+      [
+        6.1399998665,
+        693.1199951172
+      ],
+      [
+        626.6199951172,
+        684.5599975586
+      ],
+      [
+        633.3800048828,
+        58.5600013733
+      ]
+    ]
+  },
+  {
+    "file": "ch9bnu6a160d1.webp",
+    "board": "090000200450000600200140003100050060040030008070000000700003090002004850000090020",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/ch9bnu6a160d1.webp",
+    "corners": [
+      [
+        4.0,
+        247.1000061035
+      ],
+      [
+        4.0999999046,
+        937.299987793
+      ],
+      [
+        694.4000244141,
+        937.4000244141
+      ],
+      [
+        694.5,
+        246.8999938965
+      ]
+    ]
+  },
+  {
+    "file": "ctryj1nl01ac1.webp",
+    "board": "900000001008009400030070000000000100500080026600000070002096000007500030004003080",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/ctryj1nl01ac1.webp",
+    "corners": [
+      [
+        7.9899997711,
+        56.5099983215
+      ],
+      [
+        7.7300000191,
+        679.9299926758
+      ],
+      [
+        632.1300048828,
+        680.2399902344
+      ],
+      [
+        632.4400024414,
+        56.5499992371
+      ]
+    ]
+  },
+  {
+    "file": "e2fsumxl1lac1.webp",
+    "board": "003090020050038109179020384035004010000000040000200830500040091001850003360010458",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/e2fsumxl1lac1.webp",
+    "corners": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        640.0
+      ],
+      [
+        640.0,
+        640.0
+      ],
+      [
+        640.0,
+        0.0
+      ]
+    ]
+  },
+  {
+    "file": "gqx094yuu3ec1.webp",
+    "board": "001628300009000610030005080060001040070060030040080090080200060092000700006974000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/gqx094yuu3ec1.webp",
+    "corners": [
+      [
+        4.4699997902,
+        50.5600013733
+      ],
+      [
+        4.2899999619,
+        681.1799926758
+      ],
+      [
+        635.6300048828,
+        681.4400024414
+      ],
+      [
+        635.6199951172,
+        50.6399993896
+      ]
+    ]
+  },
+  {
+    "file": "gwuii8hn59fc1.webp",
+    "board": "702009400190052000800000001070085000068000040000960080607000003000526017005700604",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/gwuii8hn59fc1.webp",
+    "corners": [
+      [
+        36.7999992371,
+        7.5999999046
+      ],
+      [
+        9.6000003815,
+        613.9000244141
+      ],
+      [
+        620.0,
+        617.5999755859
+      ],
+      [
+        608.299987793,
+        25.7000007629
+      ]
+    ]
+  },
+  {
+    "file": "hlaezofsr5cc1.webp",
+    "board": "000100003000000450082930000020803000004000600001000009010006070600058000003000002",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/hlaezofsr5cc1.webp",
+    "corners": [
+      [
+        43.5099983215,
+        109.3399963379
+      ],
+      [
+        43.4300003052,
+        464.3699951172
+      ],
+      [
+        399.6199951172,
+        464.6900024414
+      ],
+      [
+        399.7900085449,
+        108.9599990845
+      ]
+    ]
+  },
+  {
+    "file": "hnp3xzbl6k0d1.webp",
+    "board": "479000685530000209182090000001206470706049001305000000000910040900407068200683107",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/hnp3xzbl6k0d1.webp",
+    "corners": [
+      [
+        17.0,
+        298.8999938965
+      ],
+      [
+        17.2000007629,
+        1344.9000244141
+      ],
+      [
+        1062.9000244141,
+        1344.9000244141
+      ],
+      [
+        1062.9000244141,
+        298.5
+      ]
+    ]
+  },
+  {
+    "file": "hwthrt5zv5cc1.webp",
+    "board": "090040050100305006007000400060030080400506001050010070009000800300809007040060090",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/hwthrt5zv5cc1.webp",
+    "corners": [
+      [
+        4.75,
+        47.4900016785
+      ],
+      [
+        4.5,
+        678.2800292969
+      ],
+      [
+        635.4000244141,
+        678.4299926758
+      ],
+      [
+        635.4299926758,
+        47.3199996948
+      ]
+    ]
+  },
+  {
+    "file": "i610r79pck8c1.jpeg",
+    "board": "009000200504010000730900006100000765000030000285000009300009057000050108002000900",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/i610r79pck8c1.jpeg",
+    "corners": [
+      [
+        12.3599996567,
+        138.4299926758
+      ],
+      [
+        12.4899997711,
+        796.3400268555
+      ],
+      [
+        614.8499755859,
+        796.1699829102
+      ],
+      [
+        614.450012207,
+        138.3699951172
+      ]
+    ]
+  },
+  {
+    "file": "ivbi176ke1bc1.jpeg",
+    "board": "800000000003600000070090200050007000000045700000100030001000068008500010090000400",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/ivbi176ke1bc1.jpeg",
+    "corners": [
+      [
+        115.7200012207,
+        5.1599998474
+      ],
+      [
+        115.8799972534,
+        246.9900054932
+      ],
+      [
+        358.2300109863,
+        247.3399963379
+      ],
+      [
+        357.7799987793,
+        4.8899998665
+      ]
+    ]
+  },
+  {
+    "file": "ju8gg6b80v0d1.webp",
+    "board": "000200000008007300670009000000000070450090000023500009000340098030070000004600002",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/ju8gg6b80v0d1.webp",
+    "corners": [
+      [
+        1.3999999762,
+        1.2999999523
+      ],
+      [
+        1.5,
+        600.0999755859
+      ],
+      [
+        600.0999755859,
+        600.0
+      ],
+      [
+        599.799987793,
+        1.7000000477
+      ]
+    ]
+  },
+  {
+    "file": "kj2ke96ornac1.webp",
+    "board": "000009075000006020800040010350608247280000060000023081436000758598764132712385090",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/kj2ke96ornac1.webp",
+    "corners": [
+      [
+        43.5,
+        99.8399963379
+      ],
+      [
+        43.6500015259,
+        455.1400146484
+      ],
+      [
+        399.6600036621,
+        455.5100097656
+      ],
+      [
+        399.9800109863,
+        99.5199966431
+      ]
+    ]
+  },
+  {
+    "file": "kw3rmdyme71d1.webp",
+    "board": "018590020700000009000301004006000508500000002807000900100207000900000003080039170",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/kw3rmdyme71d1.webp",
+    "corners": [
+      [
+        7.0999999046,
+        6.8000001907
+      ],
+      [
+        6.8000001907,
+        1082.0
+      ],
+      [
+        1080.0,
+        1082.0999755859
+      ],
+      [
+        1080.0,
+        6.1999998093
+      ]
+    ]
+  },
+  {
+    "file": "l58uwk7jmjbc1.webp",
+    "board": "000105070090000030007080160402800000060040800000700000041000000000070600009052000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/l58uwk7jmjbc1.webp",
+    "corners": [
+      [
+        43.7299995422,
+        103.0400009155
+      ],
+      [
+        43.3600006104,
+        458.4599914551
+      ],
+      [
+        399.6000061035,
+        458.6199951172
+      ],
+      [
+        399.8399963379,
+        102.8700027466
+      ]
+    ]
+  },
+  {
+    "file": "m12he0twtm0d1.webp",
+    "board": "207000000090300000000190004010080000058004060000200530080026000039000700520400000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/m12he0twtm0d1.webp",
+    "corners": [
+      [
+        5.5999999046,
+        475.6000061035
+      ],
+      [
+        5.1999998093,
+        1543.9000244141
+      ],
+      [
+        1074.5999755859,
+        1543.8000488281
+      ],
+      [
+        1074.8000488281,
+        475.700012207
+      ]
+    ]
+  },
+  {
+    "file": "me3yo8hdgqbc1.webp",
+    "board": "740010005000000703080900000001000250000000000000563000000030900100090002600200870",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/me3yo8hdgqbc1.webp",
+    "corners": [
+      [
+        43.8499984741,
+        105.1600036621
+      ],
+      [
+        43.7400016785,
+        460.1000061035
+      ],
+      [
+        399.9200134277,
+        460.7900085449
+      ],
+      [
+        399.6700134277,
+        104.9400024414
+      ]
+    ]
+  },
+  {
+    "file": "n75manw3aszc1.webp",
+    "board": "010007000907020000004000200403100008000006001000900600006030500000000000080000000",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/n75manw3aszc1.webp",
+    "corners": [
+      [
+        6.8000001907,
+        20.6000003815
+      ],
+      [
+        6.5999999046,
+        774.9000244141
+      ],
+      [
+        778.4000244141,
+        774.5
+      ],
+      [
+        778.5999755859,
+        20.5
+      ]
+    ]
+  },
+  {
+    "file": "ocbbh9k7gdfc1.jpeg",
+    "board": "020301000000460007400090050100050020009106700040080001080010003600000000000709010",
+    "url": "https://huggingface.co/datasets/Lexski/sudoku-image-recognition/resolve/main/data/test/images/ocbbh9k7gdfc1.jpeg",
+    "corners": [
+      [
+        9.8800001144,
+        143.0299987793
+      ],
+      [
+        9.8000001907,
+        799.6099853516
+      ],
+      [
+        611.7199707031,
+        799.9400024414
+      ],
+      [
+        611.6300048828,
+        142.5399932861
+      ]
+    ]
+  }
+]
