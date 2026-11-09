@@ -8,7 +8,7 @@ def test_cnn_engine_loads_model():
     """The engine should load the trained CNN model."""
     engine = CNNEngine()
 
-    assert engine.model is not None
+    assert engine.model.output_names == ["occupied", "digit"]
 
 
 def test_predict_returns_valid_digit():
