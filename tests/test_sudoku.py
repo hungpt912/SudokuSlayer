@@ -1,6 +1,6 @@
 """Run real Sudoku images through preprocessing, CNN and backtracking.
 
-Run directly with --images, --limit and --output, like preview_pipeline_image.py.
+Run directly for the official Wicht test split, or use --images for a custom directory.
 Only the input image and the backtracking result image are saved per sample.
 """
 
@@ -15,6 +15,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from sudoku_ai.config import DEFAULT_ENGINE, PROJECT_ROOT, WICHT_DIR
+from sudoku_ai.dataset import get_image_paths, read_board
 from sudoku_ai.pipeline_image.cells import split_and_normalize
 from sudoku_ai.pipeline_image.grid import detect_and_warp
 from sudoku_ai.pipeline_image.preprocess import preprocess, read_image
@@ -22,7 +23,6 @@ from sudoku_ai.recognition import get_engine
 from sudoku_ai.solver import is_valid_board, solve
 
 IMAGE_DIRECTORY = WICHT_DIR / "images"
-IMAGE_LIMIT = 100
 OUTPUT_DIRECTORY = PROJECT_ROOT / "outputs" / "sudoku"
 
 
@@ -68,46 +68,56 @@ def run_sudoku(image_path, output_directory, engine):
     result_path = destination / "backtracking.png"
     if not cv2.imwrite(str(result_path), render_result(recognized, solved)):
         raise OSError(f"Cannot save image: {result_path}")
-    return solved
+    return recognized, solved
 
 
 def test_sudoku(tmp_path):
-    """Exercise the real pipeline on the first dataset image, when installed."""
+    """Exercise the real pipeline on the first official test image, when installed."""
     import pytest
 
-    paths = sorted(IMAGE_DIRECTORY.glob("*.jpg"))
-    if not paths:
+    if not IMAGE_DIRECTORY.is_dir():
         pytest.skip(f"No JPG images in {IMAGE_DIRECTORY}")
-    result = run_sudoku(paths[0], tmp_path, get_engine(DEFAULT_ENGINE))
-    assert result is not None, f"Backtracking returned None for {paths[0].name}; see {tmp_path}"
+    path = get_image_paths("test")[0]
+    recognized, result = run_sudoku(path, tmp_path, get_engine(DEFAULT_ENGINE))
+    np.testing.assert_array_equal(recognized, read_board(path))
+    assert result is not None, f"Backtracking returned None for {path.name}; see {tmp_path}"
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--images", type=Path, default=IMAGE_DIRECTORY)
-    parser.add_argument("--limit", type=int, default=IMAGE_LIMIT, help="0 processes all images")
-    parser.add_argument("--output", type=Path, default=OUTPUT_DIRECTORY)
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--split", choices=("train", "test"), default="test", help="Official Wicht split (default: test)")
+    source.add_argument("--images", type=Path, help="Read JPG files from a custom directory")
+    parser.add_argument("--limit", type=int, default=0, help="0 processes the entire selection")
+    parser.add_argument("--output", type=Path, help="Output directory (default: outputs/sudoku/<split> or outputs/sudoku/custom)")
     args = parser.parse_args()
     if args.limit < 0:
         parser.error("--limit must be 0 or greater.")
-    if not args.images.is_dir():
-        parser.error(f"Image directory does not exist: {args.images}")
-    paths = sorted(args.images.glob("*.jpg"))
+    if args.images is None:
+        paths = get_image_paths(args.split)
+        name = args.split
+    else:
+        if not args.images.is_dir():
+            parser.error(f"Image directory does not exist: {args.images}")
+        paths = sorted(args.images.glob("*.jpg"))
+        name = "custom"
     if not paths:
         parser.error("No JPG images found.")
     if args.limit:
         paths = paths[:args.limit]
+    output = args.output or OUTPUT_DIRECTORY / name
+    print(f"Selected {len(paths)} images ({name})")
 
     engine = get_engine(DEFAULT_ENGINE)
     solved_count = 0
     for path in paths:
         try:
-            result = run_sudoku(path, args.output, engine)
+            _, result = run_sudoku(path, output, engine)
             solved_count += result is not None
             print(f"{path.name}: backtracking = {'solved' if result is not None else 'None'}")
         except (ValueError, OSError, RuntimeError, AssertionError) as error:
             print(f"{path.name}: {type(error).__name__}: {error}")
-    print(f"Solved: {solved_count}/{len(paths)}; output: {args.output.resolve()}")
+    print(f"Solved: {solved_count}/{len(paths)}; output: {output.resolve()}")
     return 0 if solved_count == len(paths) else 1
 
 
