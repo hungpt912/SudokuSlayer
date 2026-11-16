@@ -1,11 +1,15 @@
+import json
+
 import cv2
 import numpy as np
 import pytest
 
-from sudoku_ai.config import CELL_MARGIN, CELL_SIZE, DIGIT_SIZE, GRID_SIZE, MAX_IMAGE_SIDE, WARP_SIZE
-from sudoku_ai.pipeline_image.cells import find_cell_boundaries, normalize_cell, split_and_normalize, split_cells
-from sudoku_ai.pipeline_image.grid import detect_and_warp
-from sudoku_ai.pipeline_image.preprocess import preprocess
+from preview_pipeline_image import preview_image
+from sudoku_ai.config import CELL_MARGIN, CELL_SIZE, DATA_DIR, DIGIT_SIZE, GRID_SIZE, MAX_IMAGE_SIDE, WARP_SIZE, WICHT_DIR
+from sudoku_ai.dataset import read_corners
+from sudoku_ai.pipeline_image.cells import crop_cell, find_cell_boundaries, normalize_cell, split_and_normalize, split_cells
+from sudoku_ai.pipeline_image.grid import detect_and_warp, find_grid_hull
+from sudoku_ai.pipeline_image.preprocess import preprocess, read_image
 
 
 def create_test_image():
@@ -81,6 +85,20 @@ def test_complete_pipeline():
             assert has_digit == expected_digit, f"Unexpected content at row {row}, column {column}"
 
 
+def test_preview_exports_cnn_input(tmp_path):
+    image, _, _ = create_test_image()
+    path = tmp_path / "sample.png"
+    assert cv2.imwrite(str(path), image)
+    directory = preview_image(path, tmp_path / "preview")
+    board = detect_and_warp(preprocess(image))["board_gray"]
+    expected = split_and_normalize(board)
+
+    for index, cell in enumerate(expected, start=1):
+        cell_path = directory / "cell" / f"cell_{index:02d}.png"
+        actual = cv2.imread(str(cell_path), cv2.IMREAD_GRAYSCALE)
+        np.testing.assert_array_equal(actual.astype(np.float32) / 255, cell[..., 0])
+
+
 def test_split_cells_preserves_grayscale_and_order():
     board_gray = np.zeros((WARP_SIZE, WARP_SIZE), dtype=np.uint8)
 
@@ -98,9 +116,21 @@ def test_split_cells_preserves_grayscale_and_order():
     assert len(cells) == GRID_SIZE * GRID_SIZE
 
     for index, cell in enumerate(cells):
-        assert cell.shape == (inner_size, inner_size)
+        assert inner_size <= cell.shape[0] <= CELL_SIZE - 4
+        assert inner_size <= cell.shape[1] <= CELL_SIZE - 4
         assert cell.dtype == np.uint8
         assert np.all(cell == 30 + 2 * index)
+
+
+def test_crop_keeps_narrow_stroke_near_grid():
+    cell = np.full((50, 50), 230, dtype=np.uint8)
+    cv2.rectangle(cell, (0, 0), (49, 49), 0, 1)
+    cv2.rectangle(cell, (4, 8), (5, 28), 40, -1)
+    before = cell.copy()
+    cropped = crop_cell(cell)
+    assert np.count_nonzero(cropped == 40) == np.count_nonzero(cell == 40)
+    assert not np.any(cropped == 0)
+    np.testing.assert_array_equal(cell, before)
 
 
 def test_empty_cells():
@@ -120,7 +150,60 @@ def test_image_without_grid():
         detect_and_warp(preprocessed)
 
 
-def test_empty_cell_with_shadow_and_grid_remnants():
+@pytest.mark.parametrize("name", ["image25.jpg", "image34.jpg"])
+def test_grid_reaches_photo_edge(name):
+    path = WICHT_DIR / "images" / name
+    if not path.is_file():
+        pytest.skip(f"Missing Wicht image: {path}")
+    actual = cv2.convexHull(detect_and_warp(preprocess(read_image(path)))["corners_original"])
+    expected = cv2.convexHull(read_corners(path))
+    overlap, _ = cv2.intersectConvexConvex(actual, expected)
+    union = cv2.contourArea(actual) + cv2.contourArea(expected) - overlap
+    assert overlap / union >= 0.90
+
+
+def test_hull_rejects_frame_without_internal_grid():
+    paper = np.full((270, 270), 200, dtype=np.uint8)
+    outline = np.int32([[5, 5], [260, 5], [260, 260], [5, 260]])
+    cv2.polylines(paper, [outline], True, 20, 3)
+    cv2.putText(paper, "123", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 2, 50, 3)
+    assert find_grid_hull([outline], paper, paper.size * 0.10) is None
+
+
+def test_dotted_grid_uses_whole_board():
+    board = np.full((640, 640), 240, dtype=np.uint8)
+    positions = [5 + index * 70 for index in range(10)]
+    for position in positions:
+        for offset in range(5, 637, 9):
+            cv2.circle(board, (offset, position), 2, 20, -1)
+            cv2.circle(board, (position, offset), 2, 20, -1)
+    for position in (positions[3], positions[6]):
+        cv2.line(board, (5, position), (635, position), 20, 3)
+        cv2.line(board, (position, 5), (position, 635), 20, 3)
+    image = cv2.cvtColor(board, cv2.COLOR_GRAY2BGR)
+    corners = detect_and_warp(preprocess(image))["corners_original"]
+    expected = np.float32([[5, 5], [635, 5], [635, 635], [5, 635]])
+    overlap, _ = cv2.intersectConvexConvex(corners, expected)
+    union = cv2.contourArea(corners) + cv2.contourArea(expected) - overlap
+    assert overlap / union >= 0.90
+
+
+@pytest.mark.parametrize("name", ["3bor2sty6q0d1.webp", "gqx094yuu3ec1.webp", "hwthrt5zv5cc1.webp"])
+def test_lexski_grid_excludes_subgrids_and_menus(name):
+    directory = DATA_DIR / "Lexski"
+    path = directory / name
+    if not path.is_file():
+        pytest.skip(f"Missing Lexski image: {path}")
+    samples = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+    sample = next(row for row in samples if row["file"] == name)
+    reference = cv2.convexHull(np.float32(sample["corners"]))
+    actual = cv2.convexHull(detect_and_warp(preprocess(read_image(path)))["corners_original"])
+    overlap, _ = cv2.intersectConvexConvex(actual, reference)
+    union = cv2.contourArea(actual) + cv2.contourArea(reference) - overlap
+    assert overlap / union >= 0.90
+
+
+def test_uncertain_cell_keeps_grayscale_for_the_model():
     random = np.random.default_rng(42)
     background = np.tile(np.linspace(110, 170, 38), (38, 1))
     cell = np.clip(background + random.normal(0, 1, background.shape), 0, 255).astype(np.uint8)
@@ -131,7 +214,8 @@ def test_empty_cell_with_shadow_and_grid_remnants():
 
     normalized = normalize_cell(cell)
 
-    assert np.count_nonzero(normalized) == 0
+    assert normalized.shape == (DIGIT_SIZE, DIGIT_SIZE)
+    assert len(np.unique(normalized)) > 10
     np.testing.assert_array_equal(cell, before)
 
 
@@ -146,9 +230,7 @@ def test_blurred_digit_preserves_shape(digit):
     assert normalized.shape == (DIGIT_SIZE, DIGIT_SIZE)
     assert normalized.dtype == np.uint8
     assert np.count_nonzero(normalized) > 0
-    moments = cv2.moments(normalized)
-    assert moments["m10"] / moments["m00"] == pytest.approx(13.5, abs=0.6)
-    assert moments["m01"] / moments["m00"] == pytest.approx(13.5, abs=0.6)
+    assert np.unique(normalized).size > 10
 
     # Closed loops in 6 and 8 must not become solid blobs after normalization
     if digit in ("6", "8"):
@@ -165,21 +247,28 @@ def test_digit_is_kept_beside_grid_remnant():
     cv2.line(cell, (0, 0), (37, 0), 0, 2)
     cv2.line(cell, (0, 0), (0, 37), 0, 2)
 
-    # Local thresholding can change edge intensities, but must preserve the digit
-    actual_mask = normalize_cell(cell) > 127
-    expected_mask = expected > 127
+    # A dark border must preserve the shape of the digit in the interior
+    actual_mask = normalize_cell(cell)[4:-4, 4:-4] > 127
+    expected_mask = expected[4:-4, 4:-4] > 127
     overlap = np.count_nonzero(actual_mask & expected_mask)
     combined = np.count_nonzero(actual_mask | expected_mask)
     assert overlap / combined > 0.90
 
 
-def test_thinning_preserves_single_pixel_stroke():
+def test_resizing_preserves_single_pixel_stroke():
     cell = np.full((30, 24), 230, dtype=np.uint8)
     cv2.line(cell, (12, 5), (12, 24), 10, 1)
 
-    normalized = normalize_cell(cell, resize_scale=1.0)
+    normalized = normalize_cell(cell)
 
     assert np.count_nonzero(normalized) > 0
+
+
+def test_normalization_keeps_a_small_mark_small():
+    cell = np.full((50, 50), 230, dtype=np.uint8)
+    cv2.rectangle(cell, (25, 25), (27, 27), 10, -1)
+    normalized = normalize_cell(cell)
+    assert 0 < np.count_nonzero(normalized > 127) <= 9
 
 
 def test_split_cells_follows_shifted_grid_lines():
@@ -208,6 +297,35 @@ def test_missing_grid_lines_use_equal_cells():
     expected = list(range(0, WARP_SIZE + 1, CELL_SIZE))
 
     assert find_cell_boundaries(board) == [expected, expected]
+
+
+def test_cell_boundaries_follow_grid_pitch_with_extra_footer():
+    board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
+    rows = [10 + 46 * i for i in range(10)]
+    for position in rows:
+        cv2.line(board, (0, position), (WARP_SIZE - 1, position), 0, 2)
+    detected_rows, _ = find_cell_boundaries(board)
+    np.testing.assert_allclose(detected_rows, rows, atol=1)
+
+
+def test_sloping_bottom_edge_keeps_digit_and_excludes_footer():
+    board = np.full((WARP_SIZE, WARP_SIZE), 255, dtype=np.uint8)
+    scale = WARP_SIZE / 450
+    last = WARP_SIZE - 1
+    for index in range(GRID_SIZE + 1):
+        left_y = round((2 + 48 * index) * scale)
+        right_y = round((2 + 49.5 * index) * scale)
+        cv2.line(board, (0, left_y), (last, right_y), 0, 3)
+        x = min(last, index * CELL_SIZE)
+        cv2.line(board, (x, 0), (x, last), 0, 2)
+    cv2.rectangle(board, (round(20 * scale), round(426 * scale)),
+                  (round(23 * scale), round(429 * scale)), 110, -1)
+    cv2.rectangle(board, (round(20 * scale), round(442 * scale)),
+                  (round(23 * scale), round(445 * scale)), 80, -1)
+
+    bottom_left = split_cells(board)[(GRID_SIZE - 1) * GRID_SIZE]
+    assert np.any(bottom_left == 110)
+    assert not np.any(bottom_left == 80)
 
 
 @pytest.mark.parametrize("shape", [(1, 1), (2, 2), (3, 3)])

@@ -9,10 +9,6 @@ def get_engine(name: str) -> DigitEngine:
         from sudoku_ai.recognition.cnn_engine import CNNEngine
         return CNNEngine()
 
-    if name == "tesseract":
-        from sudoku_ai.recognition.tesseract_engine import TesseractEngine
-        return TesseractEngine()
-
     raise ValueError(f"Engine '{name}' is not supported.")
 
 
