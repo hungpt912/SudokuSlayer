@@ -18,13 +18,30 @@ from sudoku_ai.pipeline_image.grid import detect_and_warp  # noqa: E402
 from sudoku_ai.pipeline_image.preprocess import preprocess  # noqa: E402
 from sudoku_ai.recognition import get_engine  # noqa: E402
 from sudoku_ai.solver import solve  # noqa: E402
-from sudoku_ai.ui.board_view import COLUMNS, highlight_new_cells  # noqa: E402
+from sudoku_ai.ui.board_view import COLUMNS  # noqa: E402
 
-# Chỉ cho nhập số nguyên 0..9 khi sửa kết quả nhận diện
+# Chỉ cho nhập một chữ số 1..9 khi sửa kết quả nhận diện; xóa số để làm ô trống
 CELL_CONFIG = {
-    col: st.column_config.NumberColumn(min_value=0, max_value=9, step=1, default=0, width="small")
+    col: st.column_config.TextColumn(width=34, alignment="center", validate=r"^[1-9]?$", max_chars=1)
     for col in COLUMNS
 }
+
+CSS = """
+<style>
+.block-container {padding-top: 2rem; max-width: 1300px;}
+.step {display: flex; align-items: center; gap: .5rem; font-weight: 600; margin-bottom: .75rem;}
+.step b {display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem;
+         border-radius: 50%; background: #1f2430; color: #fff; font-size: .85rem;}
+.sdk {display: grid; grid-template-columns: repeat(9, 1fr); aspect-ratio: 1; width: 100%; max-width: 420px;
+      margin: 0 auto; border: 2px solid #1f2430; background: #fff; font-family: ui-monospace, monospace;}
+.sdk div {display: flex; align-items: center; justify-content: center; color: #1f2430;
+          font-size: clamp(.9rem, 2vw, 1.35rem); border-right: 1px solid #c9ccd3; border-bottom: 1px solid #c9ccd3;}
+.sdk div.r {border-right: 2px solid #1f2430;}
+.sdk div.b {border-bottom: 2px solid #1f2430;}
+.sdk div.n {color: #0a5c24; font-weight: 700; background: #c8f0d2;}
+.sdk div.x {color: #b42318; font-weight: 700; background: #fde8e7;}
+</style>
+"""
 
 
 @st.cache_resource(show_spinner="Đang tải mô hình CNN...")
@@ -65,8 +82,42 @@ def solve_cached(board: np.ndarray):
     return solve(board)
 
 
+def conflicts(board: np.ndarray) -> np.ndarray:
+    """Mặt nạ (9, 9): ô có số trùng với ô khác cùng hàng, cột hoặc khối 3x3."""
+    mask = np.zeros((9, 9), dtype=bool)
+    for row, col in zip(*np.nonzero(board)):
+        top, left = row // 3 * 3, col // 3 * 3
+        peers = np.concatenate([board[row], board[:, col], board[top:top + 3, left:left + 3].ravel()])
+        mask[row, col] = np.count_nonzero(peers == board[row, col]) > 3   # Chính ô đó được đếm 3 lần
+    return mask
+
+
+def board_html(board: np.ndarray, new: np.ndarray, wrong: np.ndarray) -> str:
+    """Bảng 9x9 dạng lưới HTML: ô trong `new` tô xanh, ô trong `wrong` tô đỏ, số 0 để trống."""
+    cells = []
+    for row in range(9):
+        for col in range(9):
+            classes = []
+            if col in (2, 5):
+                classes.append("r")
+            if row in (2, 5):
+                classes.append("b")
+            if wrong[row, col]:
+                classes.append("x")
+            elif new[row, col]:
+                classes.append("n")
+            cells.append(f'<div class="{" ".join(classes)}">{board[row, col] or ""}</div>')
+    return f'<div class="sdk">{"".join(cells)}</div>'
+
+
+def step(number: int, title: str) -> None:
+    """Tiêu đề một bước: số thứ tự trong vòng tròn và tên bước."""
+    st.markdown(f'<div class="step"><b>{number}</b>{title}</div>', unsafe_allow_html=True)
+
+
 def main() -> None:
-    st.set_page_config(page_title="Sudoku Vision Solver", layout="wide")
+    st.set_page_config(page_title="Sudoku Vision Solver", page_icon="🧩", layout="wide")
+    st.markdown(CSS, unsafe_allow_html=True)
     st.title("Nhận diện và giải Sudoku từ ảnh")
 
     file = st.file_uploader("Tải ảnh Sudoku", type=["png", "jpg", "jpeg"])
@@ -84,27 +135,33 @@ def main() -> None:
         return
 
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.subheader("1. Lưới tìm được")
-        st.image(warped)
-    with col2:
-        st.subheader("2. Nhận diện (sửa nếu sai)")
-        st.caption("0 là ô trống. Bấm vào ô để sửa số.")
+    with col1.container(border=True):
+        step(1, "Lưới tìm được")
+        st.image(warped, width="stretch")
+
+    with col2.container(border=True):
+        step(2, "Nhận diện")
+        st.caption("Bấm vào ô để sửa nếu đọc sai.")
         edited = st.data_editor(
-            pd.DataFrame(board, columns=COLUMNS),
+            pd.DataFrame(np.where(board > 0, board.astype(str), ""), columns=COLUMNS),
             hide_index=True,
             column_config=CELL_CONFIG,
             key=file.file_id,
+            width="stretch",
         )
-        board = np.clip(edited.fillna(0).to_numpy(dtype=int), 0, 9)
-    with col3:
-        st.subheader("3. Lời giải")
+        numbers = edited.apply(pd.to_numeric, errors="coerce").fillna(0)  # Ô trống -> 0
+        board = np.clip(numbers.to_numpy(dtype=int), 0, 9)
+
+    with col3.container(border=True):
+        step(3, "Lời giải")
         solved = solve_cached(board)
         if solved is None:
+            wrong = conflicts(board)
+            st.markdown(board_html(board, np.zeros_like(wrong), wrong), unsafe_allow_html=True)
             st.warning("Bảng mâu thuẫn hoặc vô nghiệm, hãy sửa lại các số nhận diện sai.")
         else:
-            st.dataframe(highlight_new_cells(solved, board), hide_index=True)
-            st.caption("Ô màu xanh là số do chương trình điền.")
+            st.markdown(board_html(solved, board == 0, np.zeros((9, 9), dtype=bool)), unsafe_allow_html=True)
+            st.caption("Ô xanh là số do chương trình điền.")
 
 
 if __name__ == "__main__":
