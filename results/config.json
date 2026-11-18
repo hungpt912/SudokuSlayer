@@ -1,0 +1,19 @@
+{
+  "python": "3.13.15",
+  "opencv": "4.12.0",
+  "numpy": "2.2.6",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+  "opencv_threads": 12,
+  "dataset": "all",
+  "images": 76,
+  "included": "decode preloaded bytes, preprocessing, grid/warp, cells, OCR, solve on OCR",
+  "excluded": "disk reads/writes, model loading, warm-up, scoring, image export, UI",
+  "grid_iou_threshold": 0.9,
+  "label_sources": "Wicht .dat; Lexski manifest; Murphy TestData.txt cross-checked with manifest",
+  "grid_reference": "Annotated corners for Wicht/Lexski; black screenshot frame for Murphy",
+  "tensorflow": "2.21.0",
+  "model": "witch_cnn.keras",
+  "model_sha256": "8517b270a6404900e8fb67b401041758153120d191061cc12ea7fa15a0dcebfd",
+  "model_load_ms_excluded": 96.2153
+}

@@ -1,0 +1,17 @@
+{
+  "images": 76,
+  "solved": 75,
+  "solution_rate_percent": 98.68421052631578,
+  "no_solution": [
+    "Lexski/hnp3xzbl6k0d1.webp"
+  ],
+  "invalid_solutions": [],
+  "timing": {
+    "n": 76,
+    "mean_ms": 2.1966236842105262,
+    "median_ms": 0.47555000000000003,
+    "min_ms": 0.1357,
+    "max_ms": 59.9408,
+    "stdev_ms": 7.392402663258736
+  }
+}

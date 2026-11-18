@@ -1,4 +1,7 @@
-"""Giao diện người dùng cho Sudoku AI."""
+"""Giao diện Streamlit: tải ảnh, sửa kết quả nhận diện và xem lời giải.
+
+Chạy: streamlit run app.py
+"""
 
 import sys
 from pathlib import Path
@@ -10,11 +13,11 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
-from sudoku_ai.recognition import get_engine  # noqa: E402
-from sudoku_ai.solver import solve  # noqa: E402
 from sudoku_ai.pipeline_image.cells import split_and_normalize  # noqa: E402
 from sudoku_ai.pipeline_image.grid import detect_and_warp  # noqa: E402
 from sudoku_ai.pipeline_image.preprocess import preprocess  # noqa: E402
+from sudoku_ai.recognition import get_engine  # noqa: E402
+from sudoku_ai.solver import solve  # noqa: E402
 from sudoku_ai.ui.board_view import COLUMNS, highlight_new_cells  # noqa: E402
 
 # Chỉ cho nhập số nguyên 0..9 khi sửa kết quả nhận diện
@@ -23,14 +26,15 @@ CELL_CONFIG = {
     for col in COLUMNS
 }
 
+
 @st.cache_resource(show_spinner="Đang tải mô hình CNN...")
 def load_engine():
-    """Nạp model một lần duy nhất, không nạp lại mỗi lần Streamlit chạy lại script."""
-    return get_engine("cnn")
+    """Nạp mô hình một lần, không nạp lại mỗi khi Streamlit chạy lại script."""
+    return get_engine()
 
 
 def decode_image(data: bytes) -> np.ndarray:
-    """Bytes upload -> ảnh BGR (read_image trong preprocess.py chỉ nhận đường dẫn file)."""
+    """Bytes ảnh tải lên -> ảnh BGR."""
     image = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
     if image is None:
         raise ValueError("Không đọc được ảnh. Hãy thử file PNG/JPG khác.")
@@ -39,10 +43,10 @@ def decode_image(data: bytes) -> np.ndarray:
 
 @st.cache_data(show_spinner="Đang nhận diện...")
 def read_sudoku(data: bytes):
-    """Ảnh -> (ảnh lưới đã làm phẳng, bàn cờ 9x9). Trả về (None, None) nếu không thấy lưới."""
+    """Ảnh -> (bảng đã nắn, ma trận 9x9). Trả về (None, None) nếu không thấy lưới."""
     image = decode_image(data)
     warped = None
-    for connect_lines in (False, True):          # thử lần 2 nối các đường kẻ bị đứt
+    for connect_lines in (False, True):  # Lần 2 nối các đường kẻ bị đứt
         try:
             warped = detect_and_warp(preprocess(image, connect_lines))["board_gray"]
             break
@@ -50,14 +54,14 @@ def read_sudoku(data: bytes):
             continue
     if warped is None:
         return None, None
-    cells = split_and_normalize(warped)          # (81, 28, 28, 1), float [0, 1]
+    cells = split_and_normalize(warped)  # (81, 28, 28, 1), float trong [0, 1]
     board = np.array(load_engine().predict_board(cells), dtype=int)
     return warped, board
 
+
 @st.cache_data(show_spinner="Đang giải...")
 def solve_cached(board: np.ndarray):
-    """Giải có nhớ kết quả: Streamlit chạy lại cả script mỗi lần tương tác,
-    nên bàn cờ không đổi thì không cần giải lại."""
+    """Streamlit chạy lại cả script mỗi lần tương tác; bảng không đổi thì không giải lại."""
     return solve(board)
 
 
@@ -97,7 +101,7 @@ def main() -> None:
         st.subheader("3. Lời giải")
         solved = solve_cached(board)
         if solved is None:
-            st.warning("Bàn cờ mâu thuẫn hoặc vô nghiệm, hãy sửa lại các số nhận diện sai.")
+            st.warning("Bảng mâu thuẫn hoặc vô nghiệm, hãy sửa lại các số nhận diện sai.")
         else:
             st.dataframe(highlight_new_cells(solved, board), hide_index=True)
             st.caption("Ô màu xanh là số do chương trình điền.")

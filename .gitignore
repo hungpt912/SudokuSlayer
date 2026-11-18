@@ -1,23 +1,48 @@
-/docs/
+# Môi trường Python
 .venv/
 venv/
 env/
-/.vscode/
-/.idea/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
 .env
 .env.*
-!.env.example
-!.env.template
-/backup/
+
+# IDE
+/.vscode/
+/.idea/
+
+# Ảnh dữ liệu (tải bằng scripts/download_data.py); chỉ commit nhãn và manifest
 /data/wicht/images/
 /data/Lexski/*
 !/data/Lexski/manifest.json
 /data/Murphy/*
 !/data/Murphy/manifest.json
-/outputs/
-__pycache__/
-recognition/__pycache__/
-__pycache__/
-recognition/__pycache__/
-__pycache__/
-tmp/
+!/data/Murphy/TestData.txt
+
+# Kết quả đánh giá (tests/run_tests.py ghi vào results/).
+# Chỉ commit bảng tổng hợp và ảnh minh họa; ảnh từng bước của 76 ảnh để lại trên máy.
+/results/*
+!/results/summary.md
+!/results/stage_summary.csv
+!/results/per_image.csv
+!/results/config.json
+!/results/backtracking_reference/
+/results/backtracking_reference/*
+!/results/backtracking_reference/summary.json
+!/results/examples/
+
+# Thư mục cũ, file tạm
+/output/
+/tmp/
+/backup/
+
+# Ghi chú nội bộ
+/docs/
+
+# File phụ khi biên dịch LaTeX
+/report/*.aux
+/report/*.log
+/report/*.out
+/report/*.synctex.gz

@@ -1,1 +1,1 @@
-"""Components for recognizing and solving Sudoku puzzles from images."""
+"""Nhận diện và giải Sudoku từ ảnh."""

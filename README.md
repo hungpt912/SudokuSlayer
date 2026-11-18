@@ -1,87 +1,155 @@
 # Sudoku Vision Solver
 
-Bài tập lớn môn Trí tuệ nhân tạo: Nhận diện và giải Sudoku từ ảnh.
+Bài tập lớn môn Trí tuệ nhân tạo: **nhận diện và giải Sudoku từ ảnh chụp**.
 
-Luồng xử lý: Đọc và tiền xử lý ảnh, tìm và nắn bảng, tách 81 ô, nhận diện chữ số, giải bằng backtracking.
+Hệ thống tìm lưới trong ảnh, đọc 81 ô bằng CNN rồi giải bằng thuật toán quay lui.
 
-## Cấu trúc dự án
+## Luồng xử lý
 
 ```text
-├── app.py                          # Entrypoint ứng dụng chính / Giao diện
-├── requirement.txt                 # Các thư viện phụ thuộc[cite: 2]
-├── README.md                       # Tài liệu hướng dẫn dự án
-├── .gitignore                      # Cấu hình bỏ qua các file khi commit[cite: 1]
-│
-├── src/
-│   └── sudoku_ai/                  # Package chính của dự án
-│       ├── __init__.py
-│       ├── config.py               # Kích thước và hằng số dùng chung
-│       ├── dataset.py              # Đọc ảnh và nhãn tham chiếu Wicht V2
-│       │
-│       ├── pipeline_image/         # Xử lý ảnh và tách ô Sudoku
-│       │
-│       ├── recognition/            # Module nhận diện chữ số từ ảnh ô (OCR)
-│       │   ├── __init__.py
-│       │   ├── base.py             # Lớp nền tảng / Interface cho recognition
-│       │   ├── cnn_engine.py       # Engine dự đoán bằng mô hình CNN
-│       │   ├── cnn_model.py        # Định nghĩa kiến trúc mô hình CNN
-│       │   ├── witch_cnn.keras     # Trọng số CNN huấn luyện từ Wicht V2 và MNIST
-│       │   └── train.py            # Script huấn luyện mô hình CNN
-│       │
-│       ├── solver/                 # Module xử lý thuật toán giải Sudoku
-│       │   ├── __init__.py
-│       │   ├── backtracking.py     # Thuật toán giải Backtracking
-│       │   └── validator.py        # Kiểm tra tính hợp lệ của bàn cờ
-│       │
-│       └── ui/                     # Module giao diện người dùng
-│           └── board_view.py       # Hiển thị bàn cờ Sudoku
-│
-├── tests/                          # Các file test và script xem trước
-│   ├── solver/                     # Unit test cho module solver
-│   │   ├── test_backtracking.py
-│   │   └── test_validator.py
-│   ├── ui/                         # Test cho phần giao diện
-│   │   └── test_board_view.py
-│   ├── preview_pipeline_image.py   # Script xem trước kết quả pipeline xử lý ảnh
-│   ├── benchmark_external_ocr.py  # Benchmark OCR trên Lexski và Murphy
-│   ├── test_pipeline_image.py      # Test cho pipeline xử lý ảnh
-│   ├── test_app_flow.py            # Kiểm thử luồng hoạt động chính
-│   ├── test_cnn_accuracy.py        # Đánh giá OCR trên 40 ảnh Wicht V2 test
-│   ├── test_cnn_engine.py          # Kiểm thử CNN engine
-│   ├── test_cnn_model.py           # Kiểm thử kiến trúc mô hình CNN
-│   ├── test_predict_board.py       # Kiểm thử nhận dạng toàn bộ bàn cờ
-│   └── test_sudoku.py              # Chạy từ ảnh đầu vào đến lời giải
-│
-└── data/
-    ├── Lexski/                     # Ảnh và nhãn kiểm thử Lexski
-    ├── Murphy/                     # Ảnh và nhãn kiểm thử Murphy
-    └── wicht/                      # Metadata và hướng dẫn
-        └── images/                 # Dữ liệu ảnh Sudoku (tự tải và thêm vào)
+Ảnh BGR
+  -> Tiền xử lý: ảnh xám, lọc Gaussian, phân ngưỡng thích nghi        (pipeline_image/preprocess.py)
+  -> Tìm khung bảng, nắn phối cảnh về 450x450                         (pipeline_image/grid.py)
+  -> Định vị đường kẻ, tách 81 ô, chuẩn hóa về 28x28                  (pipeline_image/cells.py)
+  -> CNN hai đầu ra: ô có số không? nếu có là số mấy (1-9)?           (recognition/cnn_engine.py)
+  -> Kiểm tra hợp lệ, giải bằng quay lui + bitmask + MRV              (solver/)
 ```
 
-## Phân công
+## Kết quả
 
-- Người A phụ trách cả ba bước trong `pipeline_image/`: tiền xử lý, tìm/nắn bảng và tách/chuẩn hóa ô.
-- Người B phụ trách nhận diện nội dung 81 ô và tạo ma trận Sudoku.
-- Người C phụ trách kiểm tra bàn cờ và thuật toán giải Sudoku.
+Đánh giá trên 76 ảnh: 40 ảnh test Wicht V2, 30 ảnh Lexski, 6 ảnh Murphy. Chi tiết trong [`results/summary.md`](results/summary.md).
 
-## Dữ liệu
+| Giai đoạn | Đúng/tổng | Tỉ lệ |
+|---|---:|---:|
+| Tìm lưới và tách ô (IoU khung >= 0.90) | 76/76 | 100.0% |
+| Nhận diện đúng cả 81 ô | 63/76 | 82.9% |
+| Giải đúng tự động từ ảnh | 62/76 | 81.6% |
+| Bộ giải trên đề gốc | 75/76 | 98.7% |
 
-Thư mục `data/` chứa:
+- Theo từng ô, CNN đọc đúng 99.19% (gồm ô trống).
+- Ảnh duy nhất vô nghiệm (`Lexski/hnp3xzbl6k0d1.webp`) có một nước điền sai của người chơi.
+- Thời gian xử lý trung bình khoảng 0.1–0.3 giây mỗi ảnh trên CPU, tùy máy.
 
-| Thành phần | Có sẵn trong repo? | Ghi chú |
+## Cấu trúc thư mục
+
+```text
+├── requirements.txt            # Thư viện cần cài
+├── pyproject.toml              # Khai báo gói sudoku_ai (chỉ cần khi huấn luyện)
+├── pytest.ini                  # Cấu hình pytest
+├── scripts/
+│   └── download_data.py        # Tải ảnh của 3 bộ dữ liệu
+├── src/sudoku_ai/
+│   ├── config.py               # Hằng số dùng chung
+│   ├── dataset.py              # Đọc danh sách ảnh, nhãn, góc bảng của Wicht V2
+│   ├── pipeline_image/         # preprocess.py, grid.py, cells.py
+│   ├── recognition/            # base.py, cnn_model.py, cnn_engine.py, train.py, witch_cnn.keras
+│   └── solver/                 # validator.py, backtracking.py
+├── tests/
+│   ├── test_cnn.py             # Kiểm thử CNN (7 ca)
+│   ├── test_backtracking.py    # Kiểm thử bộ giải (8 ca)
+│   ├── run_tests.py            # Đánh giá toàn hệ thống trên 76 ảnh
+│   └── _support.py             # Hàm hỗ trợ cho run_tests.py
+├── results/                    # Kết quả đánh giá (tạo bởi run_tests.py)
+└── data/                       # Nhãn và manifest (ảnh tải riêng)
+```
+
+## Chạy kiểm thử
+
+Chạy các lệnh từ thư mục gốc dự án, theo đúng thứ tự dưới đây. Yêu cầu Python 3.10–3.13.
+
+**Bước 1. Tạo môi trường và cài thư viện** (chỉ làm lần đầu)
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # Windows
+# source .venv/bin/activate       # Linux/macOS
+pip install -r requirements.txt
+```
+
+**Bước 2. Kiểm thử đơn vị** (không cần tải dữ liệu)
+
+```bash
+python -m pytest
+```
+
+Kết quả mong đợi: `15 passed`.
+
+- `test_cnn.py` (7 ca) dùng mô hình `witch_cnn.keras` và ô trống tạo sẵn bằng NumPy.
+- `test_backtracking.py` (8 ca) dùng hai đề Sudoku viết sẵn trong file test.
+
+**Bước 3. Tải ảnh dữ liệu** (chỉ làm lần đầu, bỏ qua file đã có)
+
+```bash
+python scripts/download_data.py
+```
+
+Repo chỉ chứa nhãn và manifest; script tải ảnh về `data/`.
+
+| Bộ dữ liệu | Vai trò | Nguồn |
 |---|---|---|
-| `data/wicht/*.desc`, `outlines_sorted.csv`, `SOURCE_README.rst` | Có | Danh sách train/test (160 + 40 ảnh) và tọa độ 4 góc bảng của bộ Wicht V2. |
-| `data/wicht/images/` | **Không** (đã `.gitignore`) | Tự tải rồi giải nén vào đây, gồm các cặp `imageN.jpg` và `imageN.dat` (nhãn). Nguồn: [wichtounet/sudoku_dataset](https://github.com/wichtounet/sudoku_dataset), dùng bản V2 (`v2_train`, `v2_test`). |
-| `data/Lexski/`, `data/Murphy/` | Chỉ có file nhãn | Hai bộ ảnh kiểm thử bổ sung. |
+| Wicht V2 | 160 ảnh train, 40 ảnh test | [wichtounet/sudoku_dataset](https://github.com/wichtounet/sudoku_dataset) (CC-BY-4.0) |
+| Lexski | 30 ảnh test | [Lexski/sudoku-image-recognition](https://huggingface.co/datasets/Lexski/sudoku-image-recognition) |
+| Murphy | 6 ảnh chụp màn hình test | [wmurphy41/sudoku_ocr](https://github.com/wmurphy41/sudoku_ocr) |
 
-Wicht V2 dùng 160 ảnh để huấn luyện và 40 ảnh để kiểm thử theo danh sách chính thức.
-Huấn luyện bổ sung 13.500 mẫu MNIST từ số `1` đến `9` với trọng số `0,2` mỗi mẫu, so với `1,0` cho Wicht.
+Tọa độ 4 góc bảng Wicht (`outlines_sorted.csv`) do Lars (@panexe) đóng góp.
 
-## Nguồn dữ liệu và giấy phép
+**Bước 4. Đánh giá toàn hệ thống trên 76 ảnh**
 
-Bộ ảnh Sudoku của Baptiste Wicht và Jean Hennebert, phát hành theo giấy phép CC-BY-4.0. 
+```bash
+python tests/run_tests.py                     # Cả 76 ảnh
+python tests/run_tests.py --dataset murphy    # Chỉ một bộ: wicht | lexski | murphy
+python tests/run_tests.py --limit 5           # Chạy thử 5 ảnh đầu
+```
 
-> Wicht, B., Hennebert, J. "Camera-based Sudoku recognition with deep belief network." *6th International Conference of Soft Computing and Pattern Recognition (SoCPaR)*, 2014, pp. 83–88.
+Mỗi ảnh chạy một lần, kết quả in ra màn hình. Mỗi lần chạy sẽ xóa kết quả cũ cùng loại.
 
-Tọa độ 4 góc bảng (`outlines_sorted.csv`) do Lars (@panexe) đóng góp.
+- Chạy đủ 76 ảnh: ghi vào `results/`.
+- Chạy một phần (`--dataset`, `--limit`): ghi vào `results/partial/` (không commit), không ghi đè kết quả đầy đủ.
+
+**Bước 5. Xem kết quả** trong `results/`
+
+| File | Nội dung |
+|---|---|
+| `summary.md` | Bảng tóm tắt độ chính xác và thời gian (xem file này trước) |
+| `stage_summary.csv` | Độ chính xác và thời gian của từng giai đoạn |
+| `per_image.csv` | Kết quả và thời gian từng ảnh |
+| `config.json` | Môi trường đo, mã băm mô hình | Có |
+| `backtracking_reference/summary.json` | Bộ giải chạy riêng trên đề gốc |
+| `examples/` | Ảnh từng bước của 2 ảnh minh họa: `Wicht/image114.jpg` (đọc đúng), `Lexski/64580592jqzc1.webp` (đọc sai 4 thành 6) |
+| `summary.json` | Số liệu chi tiết, chung và theo từng bộ dữ liệu |
+| `audit.json`, `run.log`, `backtracking_reference/per_image.csv` | Nguồn nhãn, nhật ký, thời gian giải từng đề |
+| `images/<bộ dữ liệu>/<ảnh>/` | Ảnh từng bước của cả 76 ảnh: `1_mask`, `2_detected_grid`, `3_warped_board`, `4_cnn_input`, `5_ocr_comparison.csv`, `6_solution` |
+
+
+Cách tính:
+
+- Xử lý ảnh được coi là đúng khi IoU khung ≥ 0.90 và đủ 81 ô hợp lệ.
+- Nhận diện được coi là đúng khi cả 81 ô khớp đề gốc.
+- Lời giải được coi là đúng khi thỏa luật Sudoku và giữ nguyên số gợi ý.
+- Thời gian đo không gồm đọc/ghi đĩa, nạp mô hình và lượt chạy khởi động.
+
+## Huấn luyện lại CNN
+
+Cần làm xong Bước 1 và Bước 3 ở trên. Sau đó cài thêm gói `sudoku_ai` một lần:
+
+```bash
+pip install -e .
+```
+
+Lệnh này đọc `pyproject.toml` và đăng ký `src/sudoku_ai` thành gói Python, để chạy được `python -m sudoku_ai.recognition.train`. Kiểm thử ở Bước 2 và Bước 4 không cần lệnh này.
+
+```bash
+python -m sudoku_ai.recognition.train                                   # Từ đầu: 32 epoch, lr 7e-4
+python -m sudoku_ai.recognition.train --initial-model src/sudoku_ai/recognition/witch_cnn.keras   # Tinh chỉnh: 5 epoch, lr 2e-4
+```
+
+- Dữ liệu huấn luyện: 160 ảnh train Wicht (cắt bằng chính pipeline, thêm bản làm mờ, tăng cường xoay/co giãn/dịch), tổng 51 840 ô, cộng 13 500 chữ số MNIST với trọng số 0.2.
+- Mô hình mới ghi đè `witch_cnn.keras`; dùng `--output` để lưu ra file khác.
+
+## Thành viên
+
+| Thành viên | MSSV | Phụ trách |
+|---|---|---|
+| Nguyễn Quang Linh | 24020201 | Tiền xử lý ảnh, tìm lưới, tách ô |
+| Phạm Thanh Hùng | 24020147 | Mô hình nhận diện chữ số (CNN) |
+| Đinh Huyền Trang | 23020711 | Kiểm tra hợp lệ và thuật toán giải |

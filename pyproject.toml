@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sudoku-ai"
+version = "1.0.0"
+description = "Nhận diện và giải Sudoku từ ảnh"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"sudoku_ai.recognition" = ["*.keras"]

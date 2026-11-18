@@ -1,0 +1,5 @@
+﻿stage,correct,total,percent,criterion,mean_ms
+pipeline,76,76,100.0,Grid IoU >= 0.90 and 81 valid normalized cells,152.2886802631579
+cnn,63,76,82.89473684210526,"All 81 cells equal the original givens, including blanks",60.428086842105266
+backtracking_on_ocr,62,76,81.57894736842105,Solution is valid and preserves original givens; affected by OCR errors,4.170543421052631
+full,62,76,81.57894736842105,Correct automatic solution from the input image,216.90680263157896

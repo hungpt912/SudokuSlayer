@@ -1,4 +1,7 @@
-"""Train the Sudoku CNN on Wicht V2 and MNIST training images."""
+"""Huấn luyện CNN trên ảnh train Wicht V2 và mẫu MNIST.
+
+Chạy: python -m sudoku_ai.recognition.train [--initial-model MODEL] [--epochs N]
+"""
 
 import argparse
 from pathlib import Path
@@ -16,18 +19,23 @@ from sudoku_ai.pipeline_image.preprocess import preprocess, read_image
 from sudoku_ai.recognition.cnn_model import MODEL_PATH, build_cnn
 
 SEED = 42
-MNIST_PER_DIGIT = 1500
-MNIST_WEIGHT = 0.2
+BATCH_SIZE = 128
+EPOCHS_FROM_SCRATCH = 32
+EPOCHS_FINE_TUNE = 5
+FINE_TUNE_LEARNING_RATE = 0.0002
+MNIST_PER_DIGIT = 1500      # Số mẫu MNIST cho mỗi chữ số 1..9
+MNIST_WEIGHT = 0.2          # Trọng số loss của MNIST so với 1.0 của Wicht
 
 
 def load_cells(paths):
+    """Cắt 81 ô từ mỗi ảnh train bằng đúng pipeline suy luận, kèm một bản làm mờ."""
     batches, targets = [], []
     for path in paths:
         image = preprocess(read_image(path))
         try:
             board = detect_and_warp(image)["board_gray"]
         except ValueError as error:
-            # A labelled outline can provide training cells even when detection fails.
+            # Không tìm được lưới: dùng 4 góc đã gán nhãn để cắt bảng
             corners = read_corners(path)
             if corners is None:
                 raise ValueError(f"Cannot crop training board: {path}") from error
@@ -41,7 +49,8 @@ def load_cells(paths):
 
         labels = read_board(path)
         cells = split_and_normalize(board)
-        # Align sideways training photos to the annotated rows using the ink in each cell.
+
+        # Ảnh chụp xoay ngang: chọn hướng mà ô có nhãn số chứa nhiều mực nhất
         ink = cells[:, 5:-5, 5:-5].mean(axis=(1, 2, 3)).reshape(labels.shape)
         scores = []
         for turns in range(4):
@@ -54,7 +63,7 @@ def load_cells(paths):
         batches.append(cells)
         targets.append(labels.ravel())
 
-        # Keep the labels and show the model a slightly defocused photograph.
+        # Thêm bản làm mờ nhẹ để mô hình quen ảnh lệch nét
         blurred = cv2.GaussianBlur(board, (5, 5), 1.0)
         batches.append(split_and_normalize(blurred))
         targets.append(labels.ravel())
@@ -63,6 +72,7 @@ def load_cells(paths):
 
 
 def augment(cells):
+    """Xoay +-7 độ, co giãn 0.88-1.12 và dịch tối đa 2 pixel ngẫu nhiên."""
     rng = np.random.default_rng(SEED)
     result = np.empty_like(cells)
     height, width = cells.shape[1:3]
@@ -75,19 +85,22 @@ def augment(cells):
 
 
 def load_mnist():
+    """Đặt chữ số viết tay MNIST lên nền giấy giả lập cỡ ô Sudoku rồi chuẩn hóa như ô thật."""
     (images, labels), _ = tf.keras.datasets.mnist.load_data()
     rng = np.random.default_rng(SEED)
     selected = np.concatenate([rng.choice(np.flatnonzero(labels == digit), MNIST_PER_DIGIT, replace=False)
                                for digit in range(1, 10)])
     cells = []
     for image in images[selected]:
-        # Place the handwritten digit on a light background at Sudoku cell scale.
+        # Cắt sát chữ số rồi thu về 50-78% cạnh ô
         y, x = np.nonzero(image > 20)
         glyph = image[y.min():y.max() + 1, x.min():x.max() + 1]
         scale = rng.uniform(0.50, 0.78) * CELL_SIZE / max(glyph.shape)
         width = max(1, round(glyph.shape[1] * scale))
         height = max(1, round(glyph.shape[0] * scale))
         glyph = cv2.resize(glyph, (width, height), interpolation=cv2.INTER_AREA) / 255.0
+
+        # Nền giấy sáng ngẫu nhiên, mực đậm nhạt ngẫu nhiên, lệch tâm tối đa 2 pixel
         paper = rng.uniform(170, 250)
         cell = np.full((CELL_SIZE, CELL_SIZE), paper, dtype=np.float32)
         top = (CELL_SIZE - height) // 2 + int(rng.integers(-2, 3))
@@ -102,12 +115,15 @@ def load_mnist():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--initial-model", type=Path, help="Fine-tune an existing Sudoku CNN")
+    parser.add_argument("--initial-model", type=Path, help="Tinh chỉnh tiếp từ mô hình có sẵn")
     parser.add_argument("--output", type=Path, default=MODEL_PATH)
-    parser.add_argument("--epochs", type=int, help="Default: 5 for fine-tuning, 32 from scratch")
+    parser.add_argument("--epochs", type=int,
+                        help=f"Mặc định: {EPOCHS_FINE_TUNE} khi tinh chỉnh, {EPOCHS_FROM_SCRATCH} khi train từ đầu")
     parser.add_argument("--mnist-weight", type=float, default=MNIST_WEIGHT)
     args = parser.parse_args()
-    epochs = args.epochs if args.epochs is not None else (5 if args.initial_model else 32)
+    epochs = args.epochs
+    if epochs is None:
+        epochs = EPOCHS_FINE_TUNE if args.initial_model else EPOCHS_FROM_SCRATCH
     if epochs < 1:
         parser.error("epochs must be positive.")
     if not np.isfinite(args.mnist_weight) or args.mnist_weight < 0:
@@ -119,6 +135,7 @@ def main():
     labels = np.tile(labels, 2)
     handwritten, hand_labels = load_mnist()
     print(f"Training on {len(train)} Wicht cells and {len(handwritten)} MNIST digits", flush=True)
+
     weights = np.concatenate([np.ones(len(train), dtype=np.float32),
                               np.full(len(handwritten), args.mnist_weight, dtype=np.float32)])
     train = np.concatenate([train, handwritten])
@@ -126,15 +143,16 @@ def main():
     occupied = (labels > 0).astype(np.float32)
     digits = np.maximum(labels.astype(int) - 1, 0)
 
-    # Train the occupancy head on every cell and the digit head only on filled cells.
+    # Đầu occupied học trên mọi ô; đầu digit chỉ học trên ô có số (trọng số nhân occupied)
     model = build_cnn()
     if args.initial_model:
         initial = tf.keras.models.load_model(args.initial_model, compile=False)
         model.set_weights(initial.get_weights())
-        model.optimizer.learning_rate.assign(0.0002)
+        model.optimizer.learning_rate.assign(FINE_TUNE_LEARNING_RATE)
     model.fit(train, (occupied, digits), sample_weight=(weights, weights * occupied),
-              batch_size=128, epochs=epochs, verbose=2)
+              batch_size=BATCH_SIZE, epochs=epochs, verbose=2)
 
+    # Lưu ra file tạm, nạp thử thành công rồi mới thay file mô hình cũ
     args.output.parent.mkdir(exist_ok=True, parents=True)
     with NamedTemporaryFile(dir=args.output.parent, suffix=".keras", delete=False) as handle:
         candidate = Path(handle.name)
