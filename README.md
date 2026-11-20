@@ -1,5 +1,7 @@
 # Sudoku Vision Solver
 
+**Demo:** https://sudokuslayer.streamlit.app/
+
 Bài tập lớn môn Trí tuệ nhân tạo: **nhận diện và giải Sudoku từ ảnh chụp**.
 
 Hệ thống tìm lưới trong ảnh, đọc 81 ô bằng CNN rồi giải bằng thuật toán quay lui.
