@@ -10,10 +10,10 @@ Hệ thống tìm lưới trong ảnh, đọc 81 ô bằng CNN rồi giải bằ
 
 ```text
 Ảnh BGR
-  -> Tiền xử lý: ảnh xám, lọc Gaussian, phân ngưỡng thích nghi        (pipeline_image/preprocess.py)
+  -> Tiền xử lý: ảnh xám, lọc Gaussian                                (pipeline_image/preprocess.py)
   -> Tìm khung bảng, nắn phối cảnh về 450x450                         (pipeline_image/grid.py)
   -> Định vị đường kẻ, tách 81 ô, chuẩn hóa về 28x28                  (pipeline_image/cells.py)
-  -> CNN hai đầu ra: ô có số không? nếu có là số mấy (1-9)?           (recognition/cnn_engine.py)
+  -> CNN hai đầu ra: ô có số không, nếu có là số mấy (1-9)?           (recognition/cnn_engine.py)
   -> Kiểm tra hợp lệ, giải bằng quay lui + bitmask + MRV              (solver/)
 ```
 
@@ -28,6 +28,7 @@ Hệ thống tìm lưới trong ảnh, đọc 81 ô bằng CNN rồi giải bằ
 | Giải đúng tự động từ ảnh | 62/76 | 81.6% |
 | Bộ giải trên đề gốc | 75/76 | 98.7% |
 
+- IoU = diện tích phần giao / diện tích phần hợp.
 - Theo từng ô, CNN đọc đúng 99.19% (gồm ô trống).
 - Ảnh duy nhất vô nghiệm (`Lexski/hnp3xzbl6k0d1.webp`) có một nước điền sai của người chơi.
 - Thời gian xử lý trung bình khoảng 0.1–0.3 giây mỗi ảnh trên CPU, tùy máy.
@@ -112,11 +113,11 @@ Mỗi ảnh chạy một lần, kết quả in ra màn hình. Mỗi lần chạy
 
 | File | Nội dung |
 |---|---|
-| `summary.md` | Bảng tóm tắt độ chính xác và thời gian (xem file này trước) |
+| `summary.md` | Bảng tóm tắt độ chính xác và thời gian |
 | `stage_summary.csv` | Độ chính xác và thời gian của từng giai đoạn |
 | `per_image.csv` | Kết quả và thời gian từng ảnh |
-| `config.json` | Môi trường đo, mã băm mô hình | Có |
-| `backtracking_reference/summary.json` | Bộ giải chạy riêng trên đề gốc |
+| `config.json` | Môi trường đo, mã băm mô hình |
+| `backtracking_reference/summary.json` | Bộ giải chạy riêng trên bảng nhãn đúng của dataset |
 | `examples/` | Ảnh từng bước của 2 ảnh minh họa: `Wicht/image114.jpg` (đọc đúng), `Lexski/64580592jqzc1.webp` (đọc sai 4 thành 6) |
 | `summary.json` | Số liệu chi tiết, chung và theo từng bộ dữ liệu |
 | `audit.json`, `run.log`, `backtracking_reference/per_image.csv` | Nguồn nhãn, nhật ký, thời gian giải từng đề |
